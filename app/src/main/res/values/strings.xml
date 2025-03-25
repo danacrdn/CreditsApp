@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">CreditsApp</string>
+    <string name="welcome_text">¡Bienvenido de nuevo!</string>
+    <string name="email">Email</string>
+    <string name="password">Contraseña</string>
+    <string name="log_in">Iniciar sesión</string>
+    <string name="forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="sign_up">Registrarse</string>
+    <string name="avaliable_activities">Actividades disponibles</string>
+    <string name="activity_history">Historial de actividades</string>
+    <string name="my_credits">Mis créditos</string>
+    <string name="download_documents">Descargar documentos</string>
+    <string name="total_credits">Total de créditos</string>
+    <string name="home">Inicio</string>
+    <string name="profile">Perfil</string>
+    <string name="personal_information">Información personal</string>
+    <string name="name">Nombre</string>
+    <string name="degree_name">Carrera</string>
+    <string name="settings">Configuración</string>
+    <string name="dark_mode">Modo Oscuro</string>
+    <string name="security">Seguridad</string>
+    <string name="activity">Actividad</string>
+    <string name="download">Descargar</string>
+    <string name="not_found_activity">No se encontró la actividad</string>
+
+
+</resources>
