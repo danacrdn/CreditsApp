@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
+import androidx.navigation.Navigation
 import com.example.creditsapp.ui.navigation.CreditsAppNavigation
 import com.example.creditsapp.ui.screens.LoginScreen
 import com.example.creditsapp.ui.theme.CreditsAppTheme
@@ -18,7 +19,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             CreditsAppTheme {
-                LoginScreen(modifier = Modifier.fillMaxSize(), LoginViewModel())
+                CreditsAppNavigation()
             }
         }
     }

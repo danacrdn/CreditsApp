@@ -2,8 +2,8 @@ package com.example.creditsapp.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.creditsapp.data.Activity
-import com.example.creditsapp.data.activities
+import com.example.creditsapp.model.Activity
+import com.example.creditsapp.model.activities
 
 class DownloadDocumentsViewModel : ViewModel() {
     private val _activities = activities

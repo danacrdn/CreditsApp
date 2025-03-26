@@ -15,6 +15,8 @@ import com.example.creditsapp.ui.screens.DownloadDocumentsScreen
 import com.example.creditsapp.ui.screens.HomeScreen
 import com.example.creditsapp.ui.screens.LoginScreen
 import com.example.creditsapp.ui.screens.ProfileScreen
+import com.example.creditsapp.ui.screens.SuggestionsScreen
+import com.example.creditsapp.viewmodel.LoginViewModel
 
 @Composable
 fun CreditsAppNavigation() {
@@ -22,10 +24,11 @@ fun CreditsAppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.name
+        startDestination = Screen.Login.name
     ) {
 
         composable(Screen.Login.name) {
+            LoginScreen(modifier = Modifier.fillMaxSize(), loginViewModel = LoginViewModel(), navController = navController)
 
         }
 
@@ -57,6 +60,9 @@ fun CreditsAppNavigation() {
             ConsultCreditsScreen(navController)
         }
 
+        composable(Screen.Suggestions.name) {
+            SuggestionsScreen(navController)
+        }
 
     }
 }

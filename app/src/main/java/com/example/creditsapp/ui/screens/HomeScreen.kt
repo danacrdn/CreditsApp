@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
@@ -41,9 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.creditsapp.R
-import com.example.creditsapp.data.Activity
-import com.example.creditsapp.data.User
-import com.example.creditsapp.data.userActivities
+import com.example.creditsapp.model.User
 import com.example.creditsapp.ui.components.TopBar
 import com.example.creditsapp.ui.navigation.Screen
 import com.example.creditsapp.ui.theme.CreditsAppTheme
@@ -68,16 +67,50 @@ fun HomeScreen(
             Column (
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxSize().padding(paddingValues)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
             ){
                 StudentInfo(studentName)
                 Spacer(modifier = Modifier.height(20.dp))
                 CreditsCard(totalCredits)
                 Spacer(modifier = Modifier.height(20.dp))
                 OptionsGrid(navController)
+                Spacer(modifier = Modifier.height(20.dp))
+                Suggestions(navController)
             }
         }
     )
+}
+
+@Composable
+fun Suggestions(
+    navController: NavController
+) {
+    Card(
+        modifier = Modifier
+            .width(325.dp)
+            .height(100.dp)
+            .clickable { navController.navigate(Screen.Suggestions.name) },
+    ) {
+        Row (
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(18.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            Icon(
+                imageVector = Icons.Filled.Info,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp)
+            )
+            Text(
+                text = stringResource(R.string.questions_and_suggestions),
+                style = MaterialTheme.typography.labelLarge
+            )
+        }
+    }
 }
 
 @Composable

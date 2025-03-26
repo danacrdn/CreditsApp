@@ -3,8 +3,8 @@ package com.example.creditsapp.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.creditsapp.data.User
-import com.example.creditsapp.data.users
+import com.example.creditsapp.model.User
+import com.example.creditsapp.model.users
 
 class ProfileViewModel : ViewModel(){
     private val _user = MutableLiveData<User>()

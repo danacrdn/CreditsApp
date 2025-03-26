@@ -1,8 +1,8 @@
 package com.example.creditsapp.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.example.creditsapp.data.Activity
-import com.example.creditsapp.data.userActivities
+import com.example.creditsapp.model.Activity
+import com.example.creditsapp.model.userActivities
 
 /* ViewModel para la pantalla de Mis Créditos.
 

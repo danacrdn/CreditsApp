@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.creditsapp.R
-import com.example.creditsapp.data.activities
+import com.example.creditsapp.model.activities
 import com.example.creditsapp.ui.components.TopBar
 import com.example.creditsapp.ui.navigation.Screen
 import com.example.creditsapp.ui.theme.CreditsAppTheme

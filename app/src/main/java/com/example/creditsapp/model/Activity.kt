@@ -1,4 +1,4 @@
-package com.example.creditsapp.data
+package com.example.creditsapp.model
 
 import com.example.creditsapp.R
 

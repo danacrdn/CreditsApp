@@ -22,6 +22,7 @@
     <string name="activity">Actividad</string>
     <string name="download">Descargar</string>
     <string name="not_found_activity">No se encontró la actividad</string>
+    <string name="questions_and_suggestions">Preguntas y sugerencias</string>
 
 
 </resources>

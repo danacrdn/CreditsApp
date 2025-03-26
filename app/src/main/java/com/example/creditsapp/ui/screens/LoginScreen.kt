@@ -32,13 +32,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.creditsapp.R
+import com.example.creditsapp.ui.navigation.Screen
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 import com.example.creditsapp.viewmodel.LoginViewModel
 import kotlin.math.log
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier, loginViewModel: LoginViewModel){
+fun LoginScreen(modifier: Modifier = Modifier, loginViewModel: LoginViewModel, navController: NavController){
 
     val email : String by loginViewModel.email.observeAsState("")
     val password : String by loginViewModel.password.observeAsState("")
@@ -56,7 +58,7 @@ fun LoginScreen(modifier: Modifier = Modifier, loginViewModel: LoginViewModel){
         Spacer(modifier = Modifier.height(10.dp))
         PasswordTextField(password){ loginViewModel.onLoginChanged(email = email, password = it) }
         Spacer(modifier = Modifier.height(20.dp))
-        LoginButton(loginEnable = loginEnabled)
+        LoginButton(loginEnable = loginEnabled, navController = navController)
         Spacer(modifier = Modifier.height(20.dp))
         ForgotPasswordText()
         Spacer(modifier = Modifier.height(50.dp))
@@ -67,7 +69,7 @@ fun LoginScreen(modifier: Modifier = Modifier, loginViewModel: LoginViewModel){
 @Composable
 fun SignupButton(modifier: Modifier = Modifier) {
     OutlinedButton (
-        onClick = {},
+        onClick = { },
         modifier = modifier
             .width(325.dp)
             .height(50.dp),
@@ -90,8 +92,8 @@ fun ForgotPasswordText() {
 }
 
 @Composable
-fun LoginButton(modifier: Modifier = Modifier, loginEnable: Boolean) {
-    Button(onClick = {},
+fun LoginButton(modifier: Modifier = Modifier, loginEnable: Boolean, navController: NavController) {
+    Button(onClick = { navController.navigate(Screen.Home.name) },
         enabled = loginEnable,
         modifier = modifier
             .width(325.dp)
