@@ -91,7 +91,7 @@ fun Suggestions(
         modifier = Modifier
             .width(325.dp)
             .height(100.dp)
-            .clickable { navController.navigate(Screen.Suggestions.name) },
+            .clickable { navController.navigate(Screen.Posts.name) },
     ) {
         Row (
             modifier = Modifier

@@ -1,10 +1,9 @@
 package com.example.creditsapp.ui.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -15,12 +14,15 @@ import com.example.creditsapp.ui.screens.DownloadDocumentsScreen
 import com.example.creditsapp.ui.screens.HomeScreen
 import com.example.creditsapp.ui.screens.LoginScreen
 import com.example.creditsapp.ui.screens.ProfileScreen
-import com.example.creditsapp.ui.screens.SuggestionsScreen
+import com.example.creditsapp.ui.screens.posts.PostsScreen
+import com.example.creditsapp.ui.screens.posts.PostsViewModel
 import com.example.creditsapp.viewmodel.LoginViewModel
 
 @Composable
 fun CreditsAppNavigation() {
     val navController = rememberNavController()
+    val postsViewModel: PostsViewModel=
+        viewModel(factory = PostsViewModel.Factory)
 
     NavHost(
         navController = navController,
@@ -60,8 +62,11 @@ fun CreditsAppNavigation() {
             ConsultCreditsScreen(navController)
         }
 
-        composable(Screen.Suggestions.name) {
-            SuggestionsScreen(navController)
+        composable(Screen.Posts.name) {
+            PostsScreen(
+                navController,
+                postsUiState = postsViewModel.postsUiState
+            )
         }
 
     }

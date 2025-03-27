@@ -23,6 +23,7 @@
     <string name="download">Descargar</string>
     <string name="not_found_activity">No se encontró la actividad</string>
     <string name="questions_and_suggestions">Preguntas y sugerencias</string>
-
-
+    <string name="error">Algo ha fallado</string>
+    <string name="retry">Vuelve a intentarlo</string>
+    <string name="post_title">%s</string>
 </resources>
