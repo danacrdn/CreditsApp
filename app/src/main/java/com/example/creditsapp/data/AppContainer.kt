@@ -1,6 +1,8 @@
 package com.example.creditsapp.data
 
-import com.example.creditsapp.network.ApiService
+import com.example.creditsapp.data.repository.DefaultPostsRepository
+import com.example.creditsapp.data.repository.PostsRepository
+import com.example.creditsapp.data.network.ApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
