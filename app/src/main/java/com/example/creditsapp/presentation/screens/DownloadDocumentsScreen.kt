@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -20,34 +21,42 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.presentation.components.TopBar
-import com.example.creditsapp.presentation.viewmodel.DownloadDocumentsViewModel
+import com.example.creditsapp.presentation.viewmodel.ConsultCreditsViewModel
 
 @Composable
-fun DownloadDocumentsScreen(navController: NavController, viewModel: DownloadDocumentsViewModel = viewModel() ){
-    val completedActivities by viewModel.completedActivities
+fun DownloadDocumentsScreen(
+    navController: NavController,
+    viewModel: ConsultCreditsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
+    val completedActivities by viewModel.userCompletedActivities.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.filterCompletedActivities()
-    }
-
-    Scaffold (
-        topBar = { TopBar(R.string.download_documents, navigateBack = { navController.popBackStack()}) },
+    Scaffold(
+        topBar = {
+            TopBar(
+                R.string.download_documents,
+                navigateBack = { navController.popBackStack() })
+        },
         content = { paddingValues ->
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
             ) {
 
                 // Solo se muestran las actividades que ya están completadas para descargar su constancia
-                items(completedActivities) { activity ->
+                items(completedActivities.userActivitiesList) { activity ->
                     Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 16.dp, bottom = 8.dp, end = 16.dp)
@@ -65,7 +74,7 @@ fun DownloadDocumentsScreen(navController: NavController, viewModel: DownloadDoc
                                     maxLines = 3,
                                     modifier = Modifier.weight(1f)
                                 )
-                                IconButton(onClick = {  }, modifier = Modifier.size(50.dp)) {
+                                IconButton(onClick = { }, modifier = Modifier.size(50.dp)) {
                                     Icon(
                                         imageVector = Icons.Filled.Check,
                                         contentDescription = null

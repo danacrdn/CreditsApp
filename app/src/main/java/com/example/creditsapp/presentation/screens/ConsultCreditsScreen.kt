@@ -13,19 +13,25 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
-import com.example.creditsapp.domain.model.Activity
+import com.example.creditsapp.data.database.Activity
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
 import com.example.creditsapp.ui.theme.CreditsAppTheme
@@ -33,27 +39,31 @@ import com.example.creditsapp.presentation.viewmodel.ConsultCreditsViewModel
 
 @Composable
 fun ConsultCreditsScreen(
-    navController: NavController
-){
-    val userId = 3
-    val activitiesForUser = ConsultCreditsViewModel().getActivitiesForUser(userId)
+    navController: NavController,
+    viewModel: ConsultCreditsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
+
+    val userCompletedActivitiesUiState by viewModel.userCompletedActivities.collectAsState()
 
     Scaffold(
-        topBar = { TopBar(R.string.my_credits, navigateBack = { navController.popBackStack() },
-            navigateToProfile = { navController.navigate(Screen.Profile.name)}) },
+        topBar = {
+            TopBar(
+                R.string.my_credits, navigateBack = { navController.popBackStack() },
+                navigateToProfile = { navController.navigate(Screen.Profile.name) })
+        },
         content = { paddingValues ->
-
-            Column (
+            Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxSize().padding(paddingValues)
-            ){
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
                 CreditsImage()
-                //CreditsCard()
                 Spacer(modifier = Modifier.height(20.dp))
                 CreditsListTitle()
                 Spacer(modifier = Modifier.height(20.dp))
-                CreditsList(activitiesForUser)
+                CreditsList(userCompletedActivitiesUiState.userActivitiesList)
             }
         }
     )
@@ -63,34 +73,45 @@ fun ConsultCreditsScreen(
 fun CreditsList(activitiesForUser: List<Activity>) {
     Column {
         Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            ),
             modifier = Modifier.width(325.dp),
         ) {
-            Row (modifier = Modifier.padding(16.dp)){
-                Text(text = "Actividad",
+            Row(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Actividad",
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.weight(1f))
-                Text(text = "Créditos",
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = "Créditos",
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.weight(1f))
+                    modifier = Modifier.weight(1f)
+                )
 
             }
 
-            LazyColumn { items(activitiesForUser) { activity ->
-                Card {
-                    Row (modifier = Modifier.padding(16.dp)){
-                        Text(text = activity.name,
+            LazyColumn {
+                items(activitiesForUser) { activity ->
+                    Row(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = activity.name,
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f))
-                        Text(text = activity.creditValue.toString(),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = activity.value.toString(),
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f))
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
-            } }
+            }
         }
     }
 }
@@ -98,7 +119,7 @@ fun CreditsList(activitiesForUser: List<Activity>) {
 @Composable
 fun CreditsListTitle() {
     Text(
-        text = "Lista de créditos",
+        text = stringResource(R.string.credits_list),
         style = MaterialTheme.typography.displaySmall
     )
 }
@@ -114,7 +135,7 @@ fun CreditsImage() {
 
 @Preview
 @Composable
-fun ConsultCreditsScreenPreview(){
+fun ConsultCreditsScreenPreview() {
     CreditsAppTheme {
         //ConsultCreditsScreen()
     }

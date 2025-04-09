@@ -3,34 +3,31 @@ package com.example.creditsapp.presentation.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.creditsapp.domain.model.User
+import androidx.lifecycle.viewModelScope
+import com.example.creditsapp.data.database.User
+import com.example.creditsapp.data.repository.UsersRepository
 import com.example.creditsapp.domain.model.users
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
-class ProfileViewModel : ViewModel(){
-    private val _user = MutableLiveData<User>()
-    val user: LiveData<User> get() = _user
+class ProfileViewModel(usersRepository: UsersRepository) : ViewModel() {
 
+    private val userId: Int = 1
 
-    // Función ppara obtener los datos del usuario y mostrarlos
-    // Por ahora utilizo datos ficticios
-    private fun fetchUserData() {
-        _user.value = users.last()
-    }
+    val profileUiState: StateFlow<ProfileUiState> =
+        usersRepository.getUserStream(userId).map { ProfileUiState(it) }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+            initialValue = ProfileUiState()
+        )
 
-    // Función para obtener el modo oscuro
-    private fun fetchDarkMode(){
-
-    }
-
-    // Función para guardar la configuración del modo oscuro
-    private fun saveDarkModeStatus(){
-        // Más tarde, guardaré localmente esta configuración en una base de datos:
-        // Por ejemplo: "dark_mode", estado
-    }
-
-    init {
-        fetchUserData()
+    companion object {
+        private const val TIMEOUT_MILLIS = 5_000L
     }
 
 
 }
+
+data class ProfileUiState(val profileData: User? = null)

@@ -4,9 +4,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.creditsapp.presentation.screens.ActivitiesScreen
 import com.example.creditsapp.presentation.screens.ActivityDetailsScreen
 import com.example.creditsapp.presentation.screens.CompletedActivitiesScreen
 import com.example.creditsapp.presentation.screens.ConsultCreditsScreen
@@ -30,7 +33,11 @@ fun CreditsAppNavigation() {
     ) {
 
         composable(Screen.Login.name) {
-            LoginScreen(modifier = Modifier.fillMaxSize(), loginViewModel = LoginViewModel(), navController = navController)
+            LoginScreen(
+                modifier = Modifier.fillMaxSize(),
+                loginViewModel = LoginViewModel(),
+                navController = navController
+            )
 
         }
 
@@ -42,16 +49,20 @@ fun CreditsAppNavigation() {
             ProfileScreen(navController)
         }
 
-        // Pantalla aún no implementada
         composable(Screen.Activities.name) {
+            ActivitiesScreen(navController)
         }
 
         composable(Screen.CompletedActivities.name) {
             CompletedActivitiesScreen(navController)
         }
 
-        composable(Screen.ActivityDetails.name) {
-            ActivityDetailsScreen(activityId = 1, navController)
+        composable(
+            "activity_details/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("id") ?: 0
+            ActivityDetailsScreen(activityId = id, navController)
         }
 
         composable(Screen.Downloads.name) {
@@ -68,7 +79,6 @@ fun CreditsAppNavigation() {
                 postsUiState = postsViewModel.postsUiState
             )
         }
-
     }
 }
 

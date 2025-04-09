@@ -2,6 +2,7 @@ package com.example.creditsapp.presentation.screens
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,68 +16,61 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
-import com.example.creditsapp.domain.model.User
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
-import com.example.creditsapp.ui.theme.CreditsAppTheme
 import com.example.creditsapp.presentation.viewmodel.HomeViewModel
-import com.example.creditsapp.presentation.viewmodel.ProfileViewModel
+import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 @Composable
 fun HomeScreen(
     navController: NavController,
-){
-    val viewModel: ProfileViewModel = viewModel()
+    viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
 
-    val user by viewModel.user.observeAsState(User(3, "", "", ""))
-    val totalCredits = HomeViewModel().getTotalCreditsForUser(3).toString()
+    val homeUiState by viewModel.homeUiState.collectAsState()
 
     Scaffold(
-        topBar = { TopBar(R.string.home, navigateToProfile = { navController.navigate(Screen.Profile.name)}) },
+        topBar = {
+            TopBar(
+                R.string.home,
+                navigateToProfile = { navController.navigate(Screen.Profile.name) })
+        },
         content = { paddingValues ->
 
-            val studentName: String = user.name
-
-            Column (
+            Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-            ){
-                StudentInfo(studentName)
+            ) {
+                StudentInfo(homeUiState.userCredits.name)
                 Spacer(modifier = Modifier.height(20.dp))
-                CreditsCard(totalCredits)
+                CreditsCard(homeUiState.userCredits.totalCredits.toString())
                 Spacer(modifier = Modifier.height(20.dp))
                 OptionsGrid(navController)
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 Suggestions(navController)
             }
         }
@@ -88,22 +82,29 @@ fun Suggestions(
     navController: NavController
 ) {
     Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        ),
         modifier = Modifier
             .width(325.dp)
             .height(100.dp)
             .clickable { navController.navigate(Screen.Posts.name) },
     ) {
-        Row (
+        Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(18.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
-        ){
-            Icon(
-                imageVector = Icons.Filled.Info,
+        ) {
+            Image(
+                painter = painterResource(R.drawable.forum_40dp),
                 contentDescription = null,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceDim,
+                        shape = RoundedCornerShape(15.dp)
+                    ).padding(8.dp)
             )
             Text(
                 text = stringResource(R.string.questions_and_suggestions),
@@ -117,13 +118,13 @@ fun Suggestions(
 fun StudentInfo(
     studentName: String
 ) {
-    Column (
+    Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Box(modifier = Modifier.size(60.dp)){
+        Box(modifier = Modifier.size(60.dp)) {
             Image(
-                painter = painterResource(R.drawable.profile_picture),
+                painter = painterResource(R.drawable.default_icon),
                 contentDescription = null,
                 modifier = Modifier
                     .clip(CircleShape)
@@ -149,13 +150,13 @@ fun CreditsCard(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
         ),
     ) {
-        Row (
+        Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(18.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
             Text(
                 text = stringResource(R.string.total_credits),
                 style = MaterialTheme.typography.labelLarge
@@ -175,21 +176,21 @@ fun OptionsGrid(
     Column {
         Row {
             OptionCard(
-                icon = Icons.Filled.DateRange,
+                painter = painterResource(R.drawable.event_available_40dp),
                 optionText = R.string.avaliable_activities,
-                onClick = { })
+                onClick = { navController.navigate(Screen.Activities.name) })
             OptionCard(
-                icon = Icons.Filled.Check,
+                painter = painterResource(R.drawable.history_40dp),
                 R.string.activity_history,
                 onClick = { navController.navigate(Screen.CompletedActivities.name) })
         }
         Row {
             OptionCard(
-                icon = Icons.Filled.Search,
+                painter = painterResource(R.drawable.check_circle_40dp),
                 R.string.my_credits,
-                onClick = { navController.navigate(Screen.TotalCredits.name)})
+                onClick = { navController.navigate(Screen.TotalCredits.name) })
             OptionCard(
-                icon = Icons.Filled.Star,
+                painter = painterResource(R.drawable.description_40dp),
                 R.string.download_documents,
                 onClick = { navController.navigate(Screen.Downloads.name) })
         }
@@ -198,23 +199,30 @@ fun OptionsGrid(
 
 @Composable
 fun OptionCard(
-    icon: ImageVector,
+    painter: Painter,
     @StringRes optionText: Int,
     onClick: () -> Unit
 ) {
-    Card (
+    Card(
         shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        ),
         modifier = Modifier
             .size(170.dp)
             .padding(8.dp)
             .clickable { onClick() }
-    ){
 
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Icon(
-                imageVector = icon,
+            Image(
+                painter = painter,
                 contentDescription = null,
-                modifier = Modifier.size(48.dp),
+                Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceDim,
+                        shape = RoundedCornerShape(15.dp)
+                    ).padding(8.dp)
             )
             Spacer(modifier = Modifier.weight(1f))
             Text(

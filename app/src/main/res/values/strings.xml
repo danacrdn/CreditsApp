@@ -20,10 +20,13 @@
     <string name="dark_mode">Modo Oscuro</string>
     <string name="security">Seguridad</string>
     <string name="activity">Actividad</string>
+    <string name="activities">Actividades</string>
     <string name="download">Descargar</string>
     <string name="not_found_activity">No se encontró la actividad</string>
     <string name="questions_and_suggestions">Preguntas y sugerencias</string>
     <string name="error">Algo ha fallado</string>
     <string name="retry">Vuelve a intentarlo</string>
     <string name="post_title">%s</string>
+    <string name="signup_activity">Inscribirse</string>
+    <string name="credits_list">Lista de créditos</string>
 </resources>

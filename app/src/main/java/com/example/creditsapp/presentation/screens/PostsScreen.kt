@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -44,19 +45,21 @@ import com.example.creditsapp.presentation.navigation.Screen
 fun PostsScreen(
     navController: NavController,
     postsUiState: PostsUiState
-){
+) {
     Scaffold(
-        topBar = { TopBar(
-            R.string.questions_and_suggestions, navigateBack = { navController.popBackStack() },
-            navigateToProfile = { navController.navigate(Screen.Profile.name)}) },
+        topBar = {
+            TopBar(
+                R.string.questions_and_suggestions, navigateBack = { navController.popBackStack() },
+                navigateToProfile = { navController.navigate(Screen.Profile.name) })
+        },
         content = { paddingValues ->
-            Column (
+            Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-            ){
+            ) {
                 when (postsUiState) {
                     PostsUiState.Error -> ErrorScreen()
                     PostsUiState.Loading -> LoadingScreen()
@@ -74,7 +77,7 @@ fun PostsListScreen(
     var favoriteIsClicked by remember { mutableStateOf(false) }
 
     LazyColumn {
-        items (
+        items(
             items = posts,
             key = { post -> post.id }
         ) { post ->
@@ -93,9 +96,14 @@ fun PostCard(
     post: Post,
     favoriteIsClicked: Boolean,
     onFavoriteClicked: () -> Unit,
-    modifier: Modifier) {
-    Card(modifier = modifier.padding(8.dp), shape = RoundedCornerShape(10.dp)) {
-        Column (modifier = Modifier.padding(16.dp)){
+    modifier: Modifier
+) {
+    Card(
+        modifier = modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(10.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = post.title,
                 style = MaterialTheme.typography.titleSmall
@@ -106,8 +114,10 @@ fun PostCard(
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(Modifier.height(16.dp))
-            Row (modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End){
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
 
                 if (favoriteIsClicked) {
                     Icon(
