@@ -17,6 +17,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
+import androidx.compose.material.icons.rounded.ArrowForwardIos
+import androidx.compose.material.icons.rounded.School
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -89,14 +92,16 @@ fun ActivityItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Image(
-                    painter = painterResource(R.drawable.school_40dp),
+                Icon(
+                    imageVector = Icons.Rounded.School,
                     contentDescription = null,
-                    Modifier
+                    tint = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier
                         .background(
                             color = MaterialTheme.colorScheme.surfaceDim,
                             shape = RoundedCornerShape(15.dp)
                         )
+                        .size(60.dp)
                         .padding(8.dp)
                 )
                 Spacer(Modifier.height(16.dp))
@@ -117,8 +122,8 @@ fun ActivityItem(
                 modifier = Modifier.size(50.dp)
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowForwardIos,
+                    contentDescription = null,
                 )
             }
         }

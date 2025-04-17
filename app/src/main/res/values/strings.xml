@@ -29,4 +29,5 @@
     <string name="post_title">%s</string>
     <string name="signup_activity">Inscribirse</string>
     <string name="credits_list">Lista de créditos</string>
+    <string name="language">Idioma</string>
 </resources>

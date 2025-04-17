@@ -20,21 +20,25 @@ interface UserActivityDao {
     @Delete
     suspend fun delete(userActivity: UserActivity)
 
-    @Query ("SELECT a.* from activities a " +
-            "INNER JOIN user_activity ua ON a.id = ua.activityId " +
-            "WHERE ua.userId = :id")
-    fun getActivitiesForUser(id: Int) : Flow<List<Activity>>
-
-    @Query ("SELECT a.* from activities a " +
-            "INNER JOIN user_activity ua ON a.id = ua.activityId " +
-            "WHERE ua.userId = :id AND ua.completed = 1"
+    @Query(
+        "SELECT a.* from activities a " +
+                "INNER JOIN user_activity ua ON a.id = ua.activityId " +
+                "WHERE ua.userId = :id"
     )
-    fun getCompletedActivitiesForUser(id: Int) : Flow<List<Activity>>
+    fun getActivitiesForUser(id: Int): Flow<List<Activity>>
 
-    @Query ("SELECT users.firstName AS name, SUM(activities.value) AS totalCredits from user_activity " +
-            "INNER JOIN users ON users.id = user_activity.userId " +
-            "INNER JOIN activities ON activities.id = user_activity.activityId " +
-            "WHERE user_activity.completed = 1 AND users.id = :id"
+    @Query(
+        "SELECT a.* from activities a " +
+                "INNER JOIN user_activity ua ON a.id = ua.activityId " +
+                "WHERE ua.userId = :id AND ua.completed = 1"
     )
-    fun getUserAndTotalCredits(id: Int) : Flow<UserTotalCredits>
+    fun getCompletedActivitiesForUser(id: Int): Flow<List<Activity>>
+
+    @Query(
+        "SELECT users.firstName AS name, COALESCE(SUM(activities.value), 0) AS totalCredits from user_activity " +
+                "INNER JOIN users ON users.id = user_activity.userId " +
+                "INNER JOIN activities ON activities.id = user_activity.activityId " +
+                "WHERE user_activity.completed = 1 AND users.id = :id"
+    )
+    fun getUserAndTotalCredits(id: Int): Flow<UserTotalCredits>
 }

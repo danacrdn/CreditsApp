@@ -17,6 +17,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -121,13 +125,13 @@ fun PostCard(
 
                 if (favoriteIsClicked) {
                     Icon(
-                        imageVector = Icons.Filled.Favorite,
+                        imageVector = Icons.Rounded.Favorite,
                         contentDescription = null,
                         modifier = Modifier.clickable { onFavoriteClicked() }
                     )
                 } else {
                     Icon(
-                        imageVector = Icons.Filled.FavoriteBorder,
+                        imageVector = Icons.Rounded.FavoriteBorder,
                         contentDescription = null,
                         modifier = Modifier.clickable { onFavoriteClicked() }
                     )
@@ -135,7 +139,7 @@ fun PostCard(
 
                 Spacer(Modifier.width(8.dp))
                 Icon(
-                    imageVector = Icons.Filled.MoreVert,
+                    imageVector = Icons.Rounded.MoreVert,
                     contentDescription = null
                 )
             }

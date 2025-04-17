@@ -16,8 +16,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.EventAvailable
+import androidx.compose.material.icons.rounded.Forum
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -28,7 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -97,14 +104,17 @@ fun Suggestions(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(R.drawable.forum_40dp),
+            Icon(
+                imageVector = Icons.Rounded.Forum,
                 contentDescription = null,
+                tint = MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier
                     .background(
                         color = MaterialTheme.colorScheme.surfaceDim,
                         shape = RoundedCornerShape(15.dp)
-                    ).padding(8.dp)
+                    )
+                    .size(60.dp)
+                    .padding(8.dp)
             )
             Text(
                 text = stringResource(R.string.questions_and_suggestions),
@@ -176,21 +186,21 @@ fun OptionsGrid(
     Column {
         Row {
             OptionCard(
-                painter = painterResource(R.drawable.event_available_40dp),
+                icon = Icons.Rounded.EventAvailable,
                 optionText = R.string.avaliable_activities,
                 onClick = { navController.navigate(Screen.Activities.name) })
             OptionCard(
-                painter = painterResource(R.drawable.history_40dp),
+                icon = Icons.Rounded.History,
                 R.string.activity_history,
                 onClick = { navController.navigate(Screen.CompletedActivities.name) })
         }
         Row {
             OptionCard(
-                painter = painterResource(R.drawable.check_circle_40dp),
+                icon = Icons.Rounded.CheckCircle,
                 R.string.my_credits,
                 onClick = { navController.navigate(Screen.TotalCredits.name) })
             OptionCard(
-                painter = painterResource(R.drawable.description_40dp),
+                icon = Icons.Rounded.Description,
                 R.string.download_documents,
                 onClick = { navController.navigate(Screen.Downloads.name) })
         }
@@ -199,7 +209,7 @@ fun OptionsGrid(
 
 @Composable
 fun OptionCard(
-    painter: Painter,
+    icon: ImageVector,
     @StringRes optionText: Int,
     onClick: () -> Unit
 ) {
@@ -215,15 +225,20 @@ fun OptionCard(
 
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Image(
-                painter = painter,
+            Icon(
+                imageVector = icon,
                 contentDescription = null,
+                tint = MaterialTheme.colorScheme.primaryContainer,
+                modifier =
                 Modifier
                     .background(
                         color = MaterialTheme.colorScheme.surfaceDim,
                         shape = RoundedCornerShape(15.dp)
-                    ).padding(8.dp)
+                    )
+                    .size(60.dp)
+                    .padding(8.dp)
             )
+
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = stringResource(optionText),

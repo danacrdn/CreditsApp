@@ -73,6 +73,7 @@ fun ProfileScreen(
                 Column {
                     SectionText(title = stringResource(R.string.settings))
                     Spacer(modifier = Modifier.height(16.dp))
+                    ProfileOption(title = stringResource(R.string.language), value = "Español")
                     ProfileSwitchOption(title = stringResource(R.string.dark_mode), value = true)
                 }
 

@@ -2,6 +2,7 @@ package com.example.creditsapp
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.creditsapp.presentation.viewmodel.ActivitiesViewModel
@@ -13,42 +14,37 @@ import com.example.creditsapp.presentation.viewmodel.HomeViewModel
 
 
 object AppViewModelProvider {
-    val Factory:  ViewModelProvider.Factory = viewModelFactory {
+    val Factory: ViewModelProvider.Factory = viewModelFactory {
 
         initializer {
-            val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as CreditsApp)
-            val activitiesRepository = application.container.activitiesRepository
-            ActivitiesViewModel(activitiesRepository = activitiesRepository)
+            ActivitiesViewModel(activitiesRepository = creditsApp().container.activitiesRepository)
         }
 
         initializer {
-            val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as CreditsApp)
-            val userActivitiesRepository = application.container.userActivitiesRepository
-            UserActivitiesViewModel(userActivitiesRepository = userActivitiesRepository)
+            UserActivitiesViewModel(userActivitiesRepository = creditsApp().container.userActivitiesRepository)
         }
 
         initializer {
-            val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as CreditsApp)
-            val activitiesRepository = application.container.activitiesRepository
-            ActivityDetailsViewModel(this.createSavedStateHandle(), activitiesRepository = activitiesRepository)
+            ActivityDetailsViewModel(
+                this.createSavedStateHandle(),
+                activitiesRepository = creditsApp().container.activitiesRepository,
+                userActivitiesRepository = creditsApp().container.userActivitiesRepository
+            )
         }
 
         initializer {
-            val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as CreditsApp)
-            val userActivitiesRepository = application.container.userActivitiesRepository
-            ConsultCreditsViewModel(userActivitiesRepository = userActivitiesRepository)
+            ConsultCreditsViewModel(userActivitiesRepository = creditsApp().container.userActivitiesRepository)
         }
 
         initializer {
-            val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as CreditsApp)
-            val usersRepository = application.container.usersRepository
-            ProfileViewModel(usersRepository = usersRepository)
+            ProfileViewModel(usersRepository = creditsApp().container.usersRepository)
         }
 
         initializer {
-            val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as CreditsApp)
-            val userActivitiesRepository = application.container.userActivitiesRepository
-            HomeViewModel(userActivitiesRepository = userActivitiesRepository)
+            HomeViewModel(userActivitiesRepository = creditsApp().container.userActivitiesRepository)
         }
     }
 }
+
+fun CreationExtras.creditsApp(): CreditsApp =
+    (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as CreditsApp)

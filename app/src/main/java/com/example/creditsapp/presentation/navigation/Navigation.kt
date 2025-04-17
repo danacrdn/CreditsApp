@@ -29,7 +29,7 @@ fun CreditsAppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.name
+        startDestination = Screen.Login.name
     ) {
 
         composable(Screen.Login.name) {

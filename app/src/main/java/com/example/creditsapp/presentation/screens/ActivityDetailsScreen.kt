@@ -11,10 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.Groups
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -28,8 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -45,7 +43,7 @@ import com.example.creditsapp.ui.theme.CreditsAppTheme
 fun ActivityDetailsScreen(
     activityId: Int,
     navController: NavController,
-    viewModel: ActivityDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory )
+    viewModel: ActivityDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val activityUiState by viewModel.activityUiState.collectAsState()
 
@@ -54,7 +52,6 @@ fun ActivityDetailsScreen(
         content = { paddingValues ->
 
             Column (modifier = Modifier.padding(paddingValues)){
-
                 Box(modifier = Modifier.fillMaxSize()) {
                     Column {
                         ActivityImage(R.drawable.activity)
@@ -73,29 +70,29 @@ fun ActivityDetailsScreen(
                             }
                             activityUiState.activity?.let {
                                 ActivityDetail(
-                                    icon = Icons.Filled.DateRange,
+                                    icon = Icons.Rounded.CalendarMonth,
                                     detailText = it.date,
                                     secondDetail = activityUiState.activity!!.hour
                                 )
                             }
                             activityUiState.activity?.let {
                                 ActivityDetail(
-                                    icon = Icons.Filled.Place,
+                                    icon = Icons.Rounded.LocationOn,
                                     detailText = it.place
                                 )
                             }
                             ActivityDetail(
-                                icon = Icons.Filled.Person,
+                                icon = Icons.Rounded.Groups,
                                 detailText = activityUiState.activity?.spots.toString() + " alumnos"
                             )
                             ActivityDetail(
-                                icon = Icons.Filled.Add,
+                                icon = Icons.Rounded.Add,
                                 detailText = activityUiState.activity?.value.toString() + " créditos"
                             )
                             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                            SignUpFloatingButton()
                         }
                     }
+                    SignUpFloatingButton { viewModel.insertActivityUser() }
                 }
             }
         }
@@ -103,32 +100,34 @@ fun ActivityDetailsScreen(
 }
 
 @Composable
-fun SignUpFloatingButton() {
+fun SignUpFloatingButton(
+    onClickButton: () -> Unit
+) {
     Row(
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.Bottom,
         modifier = Modifier.fillMaxSize()
     ){
         FloatingActionButton(
-            onClick = { },
+            onClick = { onClickButton() },
             modifier = Modifier.padding(16.dp)
         ) {
-            Icon(Icons.Filled.Add, null)
+            Icon(Icons.Rounded.Add, null)
         }
 
     }
 }
 
-@Composable
-fun NotFoundActivityText() {
-    Column (modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)){
-        Text(text = stringResource(R.string.not_found_activity),
-            style = MaterialTheme.typography.displaySmall,
-            textAlign = TextAlign.Center)
-    }
-}
+//@Composable
+//fun NotFoundActivityText() {
+//    Column (modifier = Modifier
+//        .fillMaxSize()
+//        .padding(16.dp)){
+//        Text(text = stringResource(R.string.not_found_activity),
+//            style = MaterialTheme.typography.displaySmall,
+//            textAlign = TextAlign.Center)
+//    }
+//}
 
 @Composable
 fun ActivityImage(image: Int) {
@@ -149,17 +148,18 @@ fun ActivityDetail(
             imageVector = icon,
             contentDescription = "Search",
             modifier = Modifier.size(30.dp),
+            tint = MaterialTheme.colorScheme.primaryContainer
         )
         Spacer(modifier = Modifier.width(10.dp))
         Column {
             Text(
                 text = detailText,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.labelLarge,
             )
             secondDetail?.let {
                 Text(
                     text = it,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
