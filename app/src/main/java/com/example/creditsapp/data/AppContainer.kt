@@ -10,13 +10,19 @@ import com.example.creditsapp.data.repository.DefaultActivitiesRepository
 import com.example.creditsapp.data.repository.DefaultUserActivitiesRepository
 import com.example.creditsapp.data.repository.DefaultUsersRepository
 import com.example.creditsapp.data.repository.UserActivitiesRepository
+import com.example.creditsapp.data.repository.UserPreferencesRepository
 import com.example.creditsapp.data.repository.UsersRepository
+import com.example.creditsapp.data.repository.dataStore
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 
 interface AppContainer {
+    val userPreferences: UserPreferencesRepository
     val postsRepository: PostsRepository
     val activitiesRepository: ActivitiesRepository
     val usersRepository: UsersRepository
@@ -24,6 +30,12 @@ interface AppContainer {
 }
 
 class DefaultAppContainer (context: Context): AppContainer {
+    private val dataStore = context.dataStore
+
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override val userPreferences = UserPreferencesRepository(dataStore, appScope)
+
     private val BASE_URL = "https://jsonplaceholder.typicode.com/"
 
     private val retrofit: Retrofit = Retrofit.Builder()
@@ -50,4 +62,5 @@ class DefaultAppContainer (context: Context): AppContainer {
     override val userActivitiesRepository: UserActivitiesRepository by lazy {
         DefaultUserActivitiesRepository(CreditsAppDatabase.getDatabase(context).userActivityDao())
     }
+
 }

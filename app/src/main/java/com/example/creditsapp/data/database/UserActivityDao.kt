@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.example.creditsapp.domain.model.UserTotalCredits
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -35,10 +34,12 @@ interface UserActivityDao {
     fun getCompletedActivitiesForUser(id: Int): Flow<List<Activity>>
 
     @Query(
-        "SELECT users.firstName AS name, COALESCE(SUM(activities.value), 0) AS totalCredits from user_activity " +
-                "INNER JOIN users ON users.id = user_activity.userId " +
-                "INNER JOIN activities ON activities.id = user_activity.activityId " +
-                "WHERE user_activity.completed = 1 AND users.id = :id"
+        "SELECT * FROM user_activity WHERE activityId = :activityId and userId = :userId"
     )
-    fun getUserAndTotalCredits(id: Int): Flow<UserTotalCredits>
+    suspend fun getActivityStatusForUser(activityId: Int, userId: Int): UserActivity
+
+    @Query(
+        "DELETE FROM user_activity WHERE activityId = :activityId and userId = :userId"
+    )
+    suspend fun deleteActivityUserByIds(activityId: Int, userId: Int)
 }

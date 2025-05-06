@@ -7,11 +7,14 @@ import com.example.creditsapp.domain.model.UserTotalCredits
 import kotlinx.coroutines.flow.Flow
 
 interface UserActivitiesRepository {
+
+    suspend fun deleteActivityUserByIds(activityId: Int, userId: Int)
+
+    suspend fun getActivityStatusForUserStream(activityId: Int, userId: Int): UserActivity
+
     fun getCompletedActivitiesForUserStream(id: Int): Flow<List<Activity>>
 
     fun getActivitiesForUserStream(id: Int): Flow<List<Activity>>
-
-    fun getUserAndTotalCreditsStream(id: Int): Flow<UserTotalCredits>
 
     suspend fun insertUserActivity(userActivity: UserActivity)
 
@@ -25,8 +28,11 @@ class DefaultUserActivitiesRepository(private val userActivityDao: UserActivityD
     override fun getActivitiesForUserStream(id: Int): Flow<List<Activity>> =
         userActivityDao.getActivitiesForUser(id)
 
-    override fun getUserAndTotalCreditsStream(id: Int): Flow<UserTotalCredits> =
-        userActivityDao.getUserAndTotalCredits(id)
+    override suspend fun deleteActivityUserByIds(activityId: Int, userId: Int) =
+        userActivityDao.deleteActivityUserByIds(activityId, userId)
+
+    override suspend fun getActivityStatusForUserStream(activityId: Int, userId: Int): UserActivity =
+        userActivityDao.getActivityStatusForUser(activityId, userId)
 
     override fun getCompletedActivitiesForUserStream(id: Int): Flow<List<Activity>> =
         userActivityDao.getCompletedActivitiesForUser(id)

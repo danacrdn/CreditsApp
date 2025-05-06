@@ -11,37 +11,70 @@ import com.example.creditsapp.presentation.viewmodel.UserActivitiesViewModel
 import com.example.creditsapp.presentation.viewmodel.ConsultCreditsViewModel
 import com.example.creditsapp.presentation.viewmodel.ProfileViewModel
 import com.example.creditsapp.presentation.viewmodel.HomeViewModel
+import com.example.creditsapp.presentation.viewmodel.LoginViewModel
+import com.example.creditsapp.presentation.viewmodel.PostsViewModel
+import com.example.creditsapp.presentation.viewmodel.SessionViewModel
 
 
 object AppViewModelProvider {
     val Factory: ViewModelProvider.Factory = viewModelFactory {
 
         initializer {
+            SessionViewModel(creditsApp().container.userPreferences)
+        }
+
+        initializer {
+            HomeViewModel(
+                usersRepository = creditsApp().container.usersRepository,
+                userPreferences = creditsApp().container.userPreferences,
+            )
+        }
+
+        initializer {
             ActivitiesViewModel(activitiesRepository = creditsApp().container.activitiesRepository)
         }
 
         initializer {
-            UserActivitiesViewModel(userActivitiesRepository = creditsApp().container.userActivitiesRepository)
+            UserActivitiesViewModel(
+                userActivitiesRepository = creditsApp().container.userActivitiesRepository,
+                userPreferences = creditsApp().container.userPreferences
+            )
         }
 
         initializer {
             ActivityDetailsViewModel(
                 this.createSavedStateHandle(),
                 activitiesRepository = creditsApp().container.activitiesRepository,
-                userActivitiesRepository = creditsApp().container.userActivitiesRepository
+                userActivitiesRepository = creditsApp().container.userActivitiesRepository,
+                userPreferences = creditsApp().container.userPreferences
             )
         }
 
         initializer {
-            ConsultCreditsViewModel(userActivitiesRepository = creditsApp().container.userActivitiesRepository)
+            ConsultCreditsViewModel(
+                userActivitiesRepository = creditsApp().container.userActivitiesRepository,
+                userPreferences = creditsApp().container.userPreferences
+            )
         }
 
         initializer {
-            ProfileViewModel(usersRepository = creditsApp().container.usersRepository)
+            ProfileViewModel(
+                usersRepository = creditsApp().container.usersRepository,
+                userPreferences = creditsApp().container.userPreferences
+            )
         }
 
         initializer {
-            HomeViewModel(userActivitiesRepository = creditsApp().container.userActivitiesRepository)
+            LoginViewModel(
+                usersRepository = creditsApp().container.usersRepository,
+                userPreferences = creditsApp().container.userPreferences
+            )
+        }
+
+        initializer {
+            PostsViewModel(
+                postsRepository = creditsApp().container.postsRepository
+            )
         }
     }
 }

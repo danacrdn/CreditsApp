@@ -30,4 +30,17 @@
     <string name="signup_activity">Inscribirse</string>
     <string name="credits_list">Lista de créditos</string>
     <string name="language">Idioma</string>
+    <string name="log_out">Cerrar sesión</string>
+    <string name="spanish">Español</string>
+    <string name="added_activity">Actividad agregada</string>
+    <string name="add_error">Error al agregar actividad</string>
+    <string name="delete_error">Error al eliminar actividad</string>
+    <string name="deleted_activity">Actividad eliminada</string>
+    <string name="cancel">Cancelar</string>
+    <string name="save">Guardar</string>
+    <string name="order_by">Ordenar por</string>
+    <string name="credits">Créditos</string>
+    <string name="by_date">Por fecha</string>
+    <string name="by_name">Por nombre</string>
+    <string name="none">No ordenar</string>
 </resources>

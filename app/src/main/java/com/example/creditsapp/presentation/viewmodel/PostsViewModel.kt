@@ -14,7 +14,6 @@ import com.example.creditsapp.domain.model.Post
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-// Esta clase tiene los estados ya predeterminados en caso de cargar exitosa o error
 sealed interface PostsUiState {
     data class Success(val posts: List<Post>) : PostsUiState
     object Error : PostsUiState
@@ -37,16 +36,6 @@ class PostsViewModel (private val postsRepository: PostsRepository) : ViewModel(
                 PostsUiState.Error
             }
 
-        }
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as CreditsApp)
-                val postsRepository = application.container.postsRepository
-                PostsViewModel(postsRepository = postsRepository)
-            }
         }
     }
 }

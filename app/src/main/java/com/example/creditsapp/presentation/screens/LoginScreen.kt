@@ -1,11 +1,14 @@
 package com.example.creditsapp.presentation.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,11 +17,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -27,32 +32,63 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.presentation.navigation.Screen
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 import com.example.creditsapp.presentation.viewmodel.LoginViewModel
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier, loginViewModel: LoginViewModel, navController: NavController){
+fun LoginScreen(
+    viewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    navController: NavController
+) {
 
-    val email : String by loginViewModel.email.observeAsState("")
-    val password : String by loginViewModel.password.observeAsState("")
-    val loginEnabled : Boolean by loginViewModel.loginEnabled.observeAsState(false)
+    val email: String by viewModel.email.observeAsState("")
+    val password: String by viewModel.password.observeAsState("")
+    val loginEnabled: Boolean by viewModel.loginEnabled.observeAsState(false)
+    var errorMessage by remember { mutableStateOf("") }
 
-    Column (
+
+    Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = modifier
-    ){
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.background)
+    ) {
         LoginImage()
         LoginText()
         Spacer(modifier = Modifier.height(20.dp))
-        EmailTextField(email) { loginViewModel.onLoginChanged(email = it, password = password) }
+        EmailTextField(email) { viewModel.onLoginChanged(email = it, password = password) }
         Spacer(modifier = Modifier.height(10.dp))
-        PasswordTextField(password){ loginViewModel.onLoginChanged(email = email, password = it) }
+        PasswordTextField(password) { viewModel.onLoginChanged(email = email, password = it) }
         Spacer(modifier = Modifier.height(20.dp))
-        LoginButton(loginEnable = loginEnabled, navController = navController)
+        LoginButton(
+            loginEnable = loginEnabled,
+            validateCredentials = {
+                viewModel.validateCredentials(email, password) { isValid ->
+                    if (isValid) {
+                        navController.navigate(Screen.Home.name) {
+                            popUpTo(Screen.Login.name) { inclusive = true }
+                        }
+                    } else {
+                        errorMessage = "Usuario o contraseña incorrectos"
+                    }
+                }
+            }
+        )
+
+        if (errorMessage.isNotEmpty()) {
+            Text(
+                errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+
         Spacer(modifier = Modifier.height(20.dp))
         ForgotPasswordText()
         Spacer(modifier = Modifier.height(50.dp))
@@ -62,7 +98,7 @@ fun LoginScreen(modifier: Modifier = Modifier, loginViewModel: LoginViewModel, n
 
 @Composable
 fun SignupButton(modifier: Modifier = Modifier) {
-    OutlinedButton (
+    OutlinedButton(
         onClick = { },
         modifier = modifier
             .width(325.dp)
@@ -81,13 +117,19 @@ fun ForgotPasswordText() {
     Text(
         text = stringResource(R.string.forgot_password),
         style = MaterialTheme.typography.labelLarge,
-        modifier = Modifier.clickable {  }
+        color = MaterialTheme.colorScheme.onBackground,
+        modifier = Modifier.clickable { }
     )
 }
 
 @Composable
-fun LoginButton(modifier: Modifier = Modifier, loginEnable: Boolean, navController: NavController) {
-    Button(onClick = { navController.navigate(Screen.Home.name) },
+fun LoginButton(
+    modifier: Modifier = Modifier,
+    loginEnable: Boolean,
+    validateCredentials: () -> Unit
+) {
+    Button(
+        onClick = { validateCredentials() },
         enabled = loginEnable,
         modifier = modifier
             .width(325.dp)
@@ -137,7 +179,8 @@ fun EmailTextField(value: String, onValueChange: (String) -> Unit) {
 fun LoginText() {
     Text(
         text = stringResource(R.string.welcome_text),
-        style = MaterialTheme.typography.displayMedium
+        style = MaterialTheme.typography.displayMedium,
+        color = MaterialTheme.colorScheme.onBackground
     )
 }
 
@@ -152,11 +195,9 @@ fun LoginImage() {
 
 @Preview
 @Composable
-fun LoginScreenPreview(){
+fun LoginScreenPreview() {
     CreditsAppTheme {
-        Surface(color = MaterialTheme.colorScheme.background) {
-            //LoginScreen(modifier = Modifier.fillMaxSize())
-        }
+
     }
 }
 

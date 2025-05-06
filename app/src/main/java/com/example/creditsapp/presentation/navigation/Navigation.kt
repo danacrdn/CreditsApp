@@ -1,9 +1,6 @@
 package com.example.creditsapp.presentation.navigation
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,26 +15,23 @@ import com.example.creditsapp.presentation.screens.HomeScreen
 import com.example.creditsapp.presentation.screens.LoginScreen
 import com.example.creditsapp.presentation.screens.ProfileScreen
 import com.example.creditsapp.presentation.screens.PostsScreen
-import com.example.creditsapp.presentation.viewmodel.PostsViewModel
-import com.example.creditsapp.presentation.viewmodel.LoginViewModel
+import com.example.creditsapp.presentation.screens.SplashScreen
 
 @Composable
 fun CreditsAppNavigation() {
     val navController = rememberNavController()
-    val postsViewModel: PostsViewModel =
-        viewModel(factory = PostsViewModel.Factory)
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Login.name
+        startDestination = Screen.Splash.name
     ) {
+        
+        composable(Screen.Splash.name) { 
+            SplashScreen(navController = navController)
+        }
 
         composable(Screen.Login.name) {
-            LoginScreen(
-                modifier = Modifier.fillMaxSize(),
-                loginViewModel = LoginViewModel(),
-                navController = navController
-            )
+            LoginScreen(navController = navController)
 
         }
 
@@ -74,10 +68,7 @@ fun CreditsAppNavigation() {
         }
 
         composable(Screen.Posts.name) {
-            PostsScreen(
-                navController,
-                postsUiState = postsViewModel.postsUiState
-            )
+            PostsScreen(navController)
         }
     }
 }

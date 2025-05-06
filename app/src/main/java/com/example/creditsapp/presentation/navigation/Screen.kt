@@ -10,4 +10,5 @@ sealed class Screen(val name: String){
     object Downloads : Screen("downloads")
     object TotalCredits : Screen("total_credits")
     object Posts : Screen("posts")
+    object Splash : Screen("splash")
 }

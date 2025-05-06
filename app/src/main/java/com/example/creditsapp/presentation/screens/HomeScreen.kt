@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Description
@@ -71,6 +73,7 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .verticalScroll(rememberScrollState())
             ) {
                 StudentInfo(homeUiState.userCredits.name)
                 Spacer(modifier = Modifier.height(20.dp))
@@ -230,13 +233,13 @@ fun OptionCard(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primaryContainer,
                 modifier =
-                Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceDim,
-                        shape = RoundedCornerShape(15.dp)
-                    )
-                    .size(60.dp)
-                    .padding(8.dp)
+                    Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.surfaceDim,
+                            shape = RoundedCornerShape(15.dp)
+                        )
+                        .size(60.dp)
+                        .padding(8.dp)
             )
 
             Spacer(modifier = Modifier.weight(1f))

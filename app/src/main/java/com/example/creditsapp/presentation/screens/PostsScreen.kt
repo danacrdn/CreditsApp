@@ -38,18 +38,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.domain.model.Post
 import com.example.creditsapp.presentation.viewmodel.PostsUiState
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
+import com.example.creditsapp.presentation.viewmodel.PostsViewModel
 
 @Composable
 fun PostsScreen(
     navController: NavController,
-    postsUiState: PostsUiState
+    viewModel: PostsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val postsUiState = viewModel.postsUiState
+
     Scaffold(
         topBar = {
             TopBar(
