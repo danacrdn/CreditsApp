@@ -11,6 +11,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.creditsapp.presentation.navigation.CreditsAppNavigation
 import com.example.creditsapp.presentation.viewmodel.SessionViewModel
 import com.example.creditsapp.ui.theme.CreditsAppTheme
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

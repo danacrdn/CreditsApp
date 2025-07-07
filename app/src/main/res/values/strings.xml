@@ -43,4 +43,6 @@
     <string name="by_date">Por fecha</string>
     <string name="by_name">Por nombre</string>
     <string name="none">No ordenar</string>
+    <string name="unavailable_activities">No hay actividades disponibles</string>
+    <string name="no_documents">No hay documentos por descargar</string>
 </resources>

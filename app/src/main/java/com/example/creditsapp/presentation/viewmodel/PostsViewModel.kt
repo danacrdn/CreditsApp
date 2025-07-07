@@ -35,7 +35,6 @@ class PostsViewModel (private val postsRepository: PostsRepository) : ViewModel(
             } catch (e: IOException) {
                 PostsUiState.Error
             }
-
         }
     }
 }

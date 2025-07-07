@@ -48,6 +48,7 @@ import com.example.creditsapp.R
 import com.example.creditsapp.data.database.Activity
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
+import com.example.creditsapp.presentation.utilities.formatDate
 import com.example.creditsapp.presentation.viewmodel.ActivitiesViewModel
 import com.example.creditsapp.presentation.viewmodel.SortOption
 
@@ -63,6 +64,7 @@ fun ActivitiesScreen(
     var showCreditsOptions by remember { mutableStateOf(false) }
     var isSortOptionExpanded by remember { mutableStateOf(false) }
 
+
     Scaffold(
         topBar = {
             TopBar(
@@ -71,35 +73,46 @@ fun ActivitiesScreen(
         },
         content = { paddingValues ->
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp)
-            ) {
-                Box(Modifier.fillMaxWidth()) {
-                    FilterCreditsBar(
-                        selectedCredits = selectedCredits,
-                        onToggleCreditValue = { credit -> viewModel.toggleCreditFilter(credit) },
-                        isCreditsExpanded = showCreditsOptions,
-                        onCreditsExpandToggle = { showCreditsOptions = !showCreditsOptions },
-                        modifier = Modifier.align(Alignment.TopStart)
-                    )
-
-                    Spacer(Modifier.width(8.dp))
-
-                    SortByBar(
-                        isSortOptionExpanded = isSortOptionExpanded,
-                        onSortExpandToggle = { isSortOptionExpanded = !isSortOptionExpanded },
-                        selectedSortOption = sortOption,
-                        onSelectSortOption = { viewModel.setSortOption(it) },
-                        modifier = Modifier.align(Alignment.TopEnd)
-                    )
-
+            if (activities.activitiesList.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(stringResource(R.string.unavailable_activities))
                 }
-                LazyColumn {
-                    items(activities.activitiesList) { activity ->
-                        ActivityItem(navController, activity)
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Box(Modifier.fillMaxWidth()) {
+                        FilterCreditsBar(
+                            selectedCredits = selectedCredits,
+                            onToggleCreditValue = { credit -> viewModel.toggleCreditFilter(credit) },
+                            isCreditsExpanded = showCreditsOptions,
+                            onCreditsExpandToggle = { showCreditsOptions = !showCreditsOptions },
+                            modifier = Modifier.align(Alignment.TopStart)
+                        )
+
+                        Spacer(Modifier.width(8.dp))
+
+                        SortByBar(
+                            isSortOptionExpanded = isSortOptionExpanded,
+                            onSortExpandToggle = { isSortOptionExpanded = !isSortOptionExpanded },
+                            selectedSortOption = sortOption,
+                            onSelectSortOption = { viewModel.setSortOption(it) },
+                            modifier = Modifier.align(Alignment.TopEnd)
+                        )
+
+                    }
+                    LazyColumn {
+                        items(activities.activitiesList) { activity ->
+                            val formatedDate = formatDate(activity.date)
+                            ActivityItem(navController, activity, formatedDate)
+                        }
                     }
                 }
             }
@@ -206,7 +219,8 @@ fun FilterCreditsBar(
 @Composable
 fun ActivityItem(
     navController: NavController,
-    activity: Activity
+    activity: Activity,
+    formatedDate: String
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -245,7 +259,7 @@ fun ActivityItem(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = activity.date,
+                    text = formatedDate,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2
                 )

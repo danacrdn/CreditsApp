@@ -26,7 +26,7 @@ fun SplashScreen(
     sessionViewModel: SessionViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
 
-    val userId by sessionViewModel.userIdFlow.collectAsState()
+    val userId by sessionViewModel.userId.collectAsState()
 
     LaunchedEffect(userId) {
         delay(1000)

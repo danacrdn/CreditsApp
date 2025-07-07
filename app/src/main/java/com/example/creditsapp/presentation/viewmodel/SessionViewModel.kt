@@ -10,8 +10,7 @@ import kotlinx.coroutines.launch
 
 class SessionViewModel(private val userPreferences: UserPreferencesRepository) : ViewModel() {
 
-    val userIdFlow: StateFlow<Int?> =
-        userPreferences.userId.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    val userId: StateFlow<Int?> = userPreferences.userId
 
     val isDarkMode: StateFlow<Boolean> =
         userPreferences.isDarkMode.stateIn(

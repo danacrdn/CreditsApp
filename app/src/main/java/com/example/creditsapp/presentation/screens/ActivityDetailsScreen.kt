@@ -50,6 +50,7 @@ import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.presentation.components.TopBar
+import com.example.creditsapp.presentation.utilities.formatDate
 import com.example.creditsapp.presentation.viewmodel.ActivityDetailsViewModel
 import com.example.creditsapp.presentation.viewmodel.UiEvent
 import com.example.creditsapp.ui.theme.CreditsAppTheme
@@ -66,6 +67,8 @@ fun ActivityDetailsScreen(
     val message by viewModel.message.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+
+    val formatedDate = activityUiState.activity?.let { formatDate(it.date) }
 
 
     /*
@@ -118,11 +121,13 @@ fun ActivityDetailsScreen(
                             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                             activityUiState.activity?.let {
-                                ActivityDetail(
-                                    icon = Icons.Rounded.CalendarMonth,
-                                    detailText = it.date,
-                                    secondDetail = activityUiState.activity!!.hour
-                                )
+                                if (formatedDate != null) {
+                                    ActivityDetail(
+                                        icon = Icons.Rounded.CalendarMonth,
+                                        detailText = formatedDate,
+                                        secondDetail = activityUiState.activity!!.hour
+                                    )
+                                }
                             }
                             activityUiState.activity?.let {
                                 ActivityDetail(
