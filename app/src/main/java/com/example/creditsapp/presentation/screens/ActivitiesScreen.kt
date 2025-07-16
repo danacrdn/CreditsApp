@@ -46,9 +46,11 @@ import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.data.database.Activity
+import com.example.creditsapp.domain.model.Actividad
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
 import com.example.creditsapp.presentation.utilities.formatDate
+import com.example.creditsapp.presentation.viewmodel.ActividadesUiState
 import com.example.creditsapp.presentation.viewmodel.ActivitiesViewModel
 import com.example.creditsapp.presentation.viewmodel.SortOption
 
@@ -60,6 +62,8 @@ fun ActivitiesScreen(
     val activities by viewModel.activities.collectAsState()
     val selectedCredits by viewModel.selectedCredits.collectAsState()
     val sortOption by viewModel.sortOption.collectAsState()
+
+    val actividadesUiState = viewModel.actividadesUiState
 
     var showCreditsOptions by remember { mutableStateOf(false) }
     var isSortOptionExpanded by remember { mutableStateOf(false) }
@@ -108,10 +112,11 @@ fun ActivitiesScreen(
                         )
 
                     }
-                    LazyColumn {
-                        items(activities.activitiesList) { activity ->
-                            val formatedDate = formatDate(activity.date)
-                            ActivityItem(navController, activity, formatedDate)
+                    when (actividadesUiState) {
+                        ActividadesUiState.Error -> ErrorScreen()
+                        ActividadesUiState.Loading -> LoadingScreen()
+                        is ActividadesUiState.Success -> {
+                            ActividadItem(navController, actividadesUiState.actividades)
                         }
                     }
                 }
@@ -119,6 +124,22 @@ fun ActivitiesScreen(
         }
     )
 }
+
+@Composable
+fun ActividadItem(
+    navController: NavController,
+    actividades: List<Actividad>
+) {
+    LazyColumn {
+        items(
+            actividades,
+            key = { actividad -> actividad.id },
+            ) { actividad ->
+            ActivityItem(navController, actividad)
+        }
+    }
+}
+
 
 @Composable
 fun SortByBar(
@@ -219,8 +240,7 @@ fun FilterCreditsBar(
 @Composable
 fun ActivityItem(
     navController: NavController,
-    activity: Activity,
-    formatedDate: String
+    activity: Actividad,
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -253,13 +273,13 @@ fun ActivityItem(
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    text = activity.name,
+                    text = activity.nombre,
                     style = MaterialTheme.typography.labelLarge,
                     maxLines = 2
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = formatedDate,
+                    text = activity.fechaInicio,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2
                 )

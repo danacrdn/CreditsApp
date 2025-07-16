@@ -5,8 +5,17 @@ import com.example.creditsapp.data.database.CreditsAppDatabase
 import com.example.creditsapp.data.repository.DefaultPostsRepository
 import com.example.creditsapp.data.repository.PostsRepository
 import com.example.creditsapp.data.network.ApiService
+import com.example.creditsapp.data.network.BackendApiService
+import com.example.creditsapp.data.repository.ActividadesRepository
 import com.example.creditsapp.data.repository.ActivitiesRepository
+import com.example.creditsapp.data.repository.AlumnoActividadRepository
+import com.example.creditsapp.data.repository.AlumnosRepository
+import com.example.creditsapp.data.repository.AuthRepository
+import com.example.creditsapp.data.repository.DefaultActividadesRepository
 import com.example.creditsapp.data.repository.DefaultActivitiesRepository
+import com.example.creditsapp.data.repository.DefaultAlumnoActividadRepository
+import com.example.creditsapp.data.repository.DefaultAlumnosRepository
+import com.example.creditsapp.data.repository.DefaultAuthRepository
 import com.example.creditsapp.data.repository.DefaultUserActivitiesRepository
 import com.example.creditsapp.data.repository.DefaultUsersRepository
 import com.example.creditsapp.data.repository.UserActivitiesRepository
@@ -27,6 +36,10 @@ interface AppContainer {
     val activitiesRepository: ActivitiesRepository
     val usersRepository: UsersRepository
     val userActivitiesRepository: UserActivitiesRepository
+    val alumnosRepository: AlumnosRepository
+    val actividadesRepository: ActividadesRepository
+    val alumnoActividadRepository: AlumnoActividadRepository
+    val authRepository: AuthRepository
 }
 
 class DefaultAppContainer (context: Context): AppContainer {
@@ -47,6 +60,18 @@ class DefaultAppContainer (context: Context): AppContainer {
         retrofit.create(ApiService::class.java)
     }
 
+    // API de backend
+    private val NEW_BASE_URL = "http://10.0.2.2:5091/"
+
+    private val backendRetrofit: Retrofit = Retrofit.Builder()
+        .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+        .baseUrl(NEW_BASE_URL)
+        .build()
+
+    private val backendRetrofitService: BackendApiService by lazy {
+        backendRetrofit.create(BackendApiService::class.java)
+    }
+
     override val postsRepository: PostsRepository by lazy {
         DefaultPostsRepository(retrofitService)
     }
@@ -63,4 +88,19 @@ class DefaultAppContainer (context: Context): AppContainer {
         DefaultUserActivitiesRepository(CreditsAppDatabase.getDatabase(context).userActivityDao())
     }
 
+    override val alumnosRepository: AlumnosRepository by lazy {
+        DefaultAlumnosRepository(backendRetrofitService)
+    }
+
+    override val actividadesRepository: ActividadesRepository by lazy {
+        DefaultActividadesRepository(backendRetrofitService)
+    }
+
+    override val alumnoActividadRepository: AlumnoActividadRepository by lazy {
+        DefaultAlumnoActividadRepository(backendRetrofitService)
+    }
+
+    override val authRepository: AuthRepository by lazy {
+        DefaultAuthRepository(backendRetrofitService)
+    }
 }

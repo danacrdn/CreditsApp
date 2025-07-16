@@ -82,10 +82,12 @@ fun HomeScreen(
                 OptionsGrid(navController)
                 Spacer(modifier = Modifier.height(8.dp))
                 Suggestions(navController)
+
             }
         }
     )
 }
+
 
 @Composable
 fun Suggestions(
