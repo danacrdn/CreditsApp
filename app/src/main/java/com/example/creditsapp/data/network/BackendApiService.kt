@@ -3,6 +3,7 @@ package com.example.creditsapp.data.network
 import com.example.creditsapp.domain.model.Actividad
 import com.example.creditsapp.domain.model.Alumno
 import com.example.creditsapp.domain.model.AlumnoActividad
+import com.example.creditsapp.domain.model.Carrera
 import com.example.creditsapp.domain.model.Inscripcion
 import com.example.creditsapp.domain.model.LoginRequest
 import com.example.creditsapp.domain.model.LoginResponse
@@ -64,6 +65,10 @@ interface BackendApiService {
         @Path("alumnoId") alumnoId: Int,
         @Path("actividadId") actividadId: Int,
     )
+
+    // Carrera
+    @GET("/api/Carreras/carreras")
+    suspend fun getCarreras(): List<Carrera>
 
     // Auth
     @POST("/api/Auth/register")
