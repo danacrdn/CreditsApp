@@ -1,6 +1,5 @@
 package com.example.creditsapp.data.repository
 
-import android.util.Log
 import com.example.creditsapp.data.network.BackendApiService
 import com.example.creditsapp.domain.model.Alumno
 

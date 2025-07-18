@@ -2,6 +2,7 @@ package com.example.creditsapp.presentation.navigation
 
 sealed class Screen(val name: String){
     object Login : Screen("login")
+    object Register : Screen("Register")
     object Home : Screen("home")
     object Profile : Screen("profile")
     object Activities : Screen("activities")

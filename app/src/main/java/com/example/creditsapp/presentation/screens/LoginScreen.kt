@@ -92,14 +92,14 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(20.dp))
         ForgotPasswordText()
         Spacer(modifier = Modifier.height(50.dp))
-        SignupButton()
+        SignupButton(navController)
     }
 }
 
 @Composable
-fun SignupButton(modifier: Modifier = Modifier) {
+fun SignupButton(navController: NavController, modifier: Modifier = Modifier) {
     OutlinedButton(
-        onClick = { },
+        onClick = { navController.navigate(Screen.Register.name)},
         modifier = modifier
             .width(325.dp)
             .height(50.dp),
@@ -147,6 +147,7 @@ fun PasswordTextField(value: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
+        textStyle = MaterialTheme.typography.labelMedium,
         label = {
             Text(text = stringResource(R.string.password))
         },
@@ -164,6 +165,7 @@ fun EmailTextField(value: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
+        textStyle = MaterialTheme.typography.labelMedium,
         label = {
             Text(text = stringResource(R.string.email))
         },

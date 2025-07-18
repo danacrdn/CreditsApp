@@ -15,6 +15,7 @@ import com.example.creditsapp.presentation.screens.HomeScreen
 import com.example.creditsapp.presentation.screens.LoginScreen
 import com.example.creditsapp.presentation.screens.ProfileScreen
 import com.example.creditsapp.presentation.screens.PostsScreen
+import com.example.creditsapp.presentation.screens.RegisterScreen
 import com.example.creditsapp.presentation.screens.SplashScreen
 
 @Composable
@@ -33,6 +34,10 @@ fun CreditsAppNavigation() {
         composable(Screen.Login.name) {
             LoginScreen(navController = navController)
 
+        }
+
+        composable(Screen.Register.name) {
+            RegisterScreen(navController = navController)
         }
 
         composable(Screen.Home.name) {
