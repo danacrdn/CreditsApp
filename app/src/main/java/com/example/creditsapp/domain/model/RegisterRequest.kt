@@ -14,3 +14,6 @@ data class RegisterRequest (
     val totalCreditos: Double,
     val carreraId: Int
 )
+
+@Serializable
+data class RegisterResponse (val message: String)

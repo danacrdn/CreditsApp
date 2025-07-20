@@ -8,6 +8,7 @@ import com.example.creditsapp.domain.model.Inscripcion
 import com.example.creditsapp.domain.model.LoginRequest
 import com.example.creditsapp.domain.model.LoginResponse
 import com.example.creditsapp.domain.model.RegisterRequest
+import com.example.creditsapp.domain.model.RegisterResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -67,14 +68,14 @@ interface BackendApiService {
     )
 
     // Carrera
-    @GET("/api/Carreras/carreras")
+    @GET("/api/Carrera/carreras")
     suspend fun getCarreras(): List<Carrera>
 
     // Auth
     @POST("/api/Auth/register")
     suspend fun register(
         @Body registerRequest: RegisterRequest
-    ): String
+    ): RegisterResponse
 
     @POST("api/Auth/login")
     suspend fun login(

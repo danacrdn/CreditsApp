@@ -13,6 +13,7 @@ import com.example.creditsapp.presentation.viewmodel.ProfileViewModel
 import com.example.creditsapp.presentation.viewmodel.HomeViewModel
 import com.example.creditsapp.presentation.viewmodel.LoginViewModel
 import com.example.creditsapp.presentation.viewmodel.PostsViewModel
+import com.example.creditsapp.presentation.viewmodel.RegisterViewModel
 import com.example.creditsapp.presentation.viewmodel.SessionViewModel
 
 
@@ -79,6 +80,13 @@ object AppViewModelProvider {
         initializer {
             PostsViewModel(
                 postsRepository = creditsApp().container.postsRepository
+            )
+        }
+
+        initializer {
+            RegisterViewModel(
+                carreraRepository = creditsApp().container.carreraRepository,
+                authRepository = creditsApp().container.authRepository
             )
         }
     }

@@ -10,24 +10,51 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
+import com.example.creditsapp.domain.model.Carrera
 import com.example.creditsapp.presentation.navigation.Screen
+import com.example.creditsapp.presentation.viewmodel.RegisterViewModel
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 @Composable
-fun RegisterScreen(navController: NavController) {
+fun RegisterScreen(
+    viewModel: RegisterViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    navController: NavController) {
+
+    val uiState by viewModel.uiState.collectAsState()
+    val carreras = uiState.carreras
+
+    LaunchedEffect(carreras) {
+        println("Carreras obtenidas:")
+        carreras.forEach { println(it) }
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -38,66 +65,153 @@ fun RegisterScreen(navController: NavController) {
         RegisterText()
         Spacer(modifier = Modifier.height(20.dp))
         DataTextField(
-            value = "Nombre",
-            onValueChange = {},
+            value = uiState.nombre,
+            onValueChange = viewModel::onNombreChanged,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             labelText = stringResource(R.string.name)
         )
         Spacer(modifier = Modifier.height(10.dp))
         DataTextField(
-            value = "Apellido",
-            onValueChange = {},
+            value = uiState.apellido,
+            onValueChange = viewModel::onApellidoChanged,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             labelText = stringResource(R.string.last_name)
         )
         Spacer(modifier = Modifier.height(10.dp))
         DataTextField(
-            value = "Número de control",
-            onValueChange = {},
+            value = uiState.numeroControl,
+            onValueChange = viewModel::onNumeroControl,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             labelText = stringResource(R.string.no_control)
         )
         Spacer(modifier = Modifier.height(10.dp))
         DataTextField(
-            value = "Email",
-            onValueChange = {},
+            value = uiState.email,
+            onValueChange = viewModel::onEmailChanged,
             KeyboardOptions(keyboardType = KeyboardType.Email),
             stringResource(R.string.email)
         )
         Spacer(modifier = Modifier.height(10.dp))
-        DataTextField(
-            value = "Semestre",
-            onValueChange = {},
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            labelText = stringResource(R.string.semester)
+
+            DropdownSemester(
+                selectedSemester = uiState.semestre,
+                onSemesterSelected = { viewModel.onSemestreChanged(it) }
+            )
+
+        Spacer(modifier = Modifier.height(10.dp))
+        DropdownCareers(
+            options = uiState.carreras,
+            selectedCareer = uiState.selectedCareer,
+            onCareerSelected = viewModel::onCareerSelected
         )
         Spacer(modifier = Modifier.height(10.dp))
         DataTextField(
-            value = "Carrera",
-            onValueChange = {},
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            labelText = stringResource(R.string.degree_name)
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        DataTextField(
-            value = "Contraseña",
-            onValueChange = {},
+            value = uiState.password,
+            onValueChange = viewModel::onPasswordChanged,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            labelText = stringResource(R.string.password)
+            labelText = stringResource(R.string.password),
+            visualTransformation = PasswordVisualTransformation()
         )
         Spacer(modifier = Modifier.height(10.dp))
         DataTextField(
-            value = "Confirmar contraseña",
-            onValueChange = {},
+            value = uiState.confirmPassword,
+            onValueChange = viewModel::onConfirmPasswordChanged,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            labelText = stringResource(R.string.password)
+            labelText = stringResource(R.string.confirm_password),
+            visualTransformation = PasswordVisualTransformation()
         )
         Spacer(modifier = Modifier.height(20.dp))
-        ConfirmSignUpButton()
+        ConfirmSignUpButton(viewModel::signUpNewUser)
         Spacer(modifier = Modifier.height(10.dp))
         LoginBackButton(navController)
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DropdownSemester(selectedSemester: Int?, onSemesterSelected: (Int) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val semesterOptions = (1..12).toList()
+    val selectedText = selectedSemester?.toString() ?: "Selecciona tu semestre"
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            value = selectedText,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(text = "Semestre") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor()
+                .width(325.dp),
+            shape = RoundedCornerShape(30.dp),
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            semesterOptions.forEach { semester ->
+                DropdownMenuItem(
+                    text = { Text(text = semester.toString()) },
+                    onClick = {
+                        onSemesterSelected(semester)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DropdownCareers(
+    options: List<Carrera>,
+    selectedCareer: Carrera?,
+    onCareerSelected: (Carrera) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedOptionText = selectedCareer?.nombre ?: "Selecciona una carrera"
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier.width(325.dp)
+    ) {
+        OutlinedTextField(
+            value = selectedOptionText,
+            onValueChange = { /* No permitir edición manual */ },
+            readOnly = true,
+            label = { Text("Carrera") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor()
+                .width(325.dp),
+            shape = RoundedCornerShape(30.dp),
+            singleLine = true,
+            maxLines = 1,
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option.nombre) },
+                    onClick = {
+                        onCareerSelected(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun LoginBackButton(navController: NavController) {
@@ -115,9 +229,9 @@ fun LoginBackButton(navController: NavController) {
 }
 
 @Composable
-fun ConfirmSignUpButton() {
+fun ConfirmSignUpButton(signUpUser: () -> Unit) {
     Button(
-        onClick = {  },
+        onClick = signUpUser,
         enabled = true,
         modifier = Modifier
             .width(325.dp)
@@ -135,7 +249,8 @@ fun DataTextField(
     value: String,
     onValueChange: (String) -> Unit,
     keyboardOptions: KeyboardOptions,
-    labelText: String
+    labelText: String,
+    visualTransformation: VisualTransformation = VisualTransformation.None
 ) {
     OutlinedTextField(
         value = value,
@@ -146,8 +261,9 @@ fun DataTextField(
         shape = RoundedCornerShape(30.dp),
         singleLine = true,
         maxLines = 1,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        modifier = Modifier.width(325.dp)
+        keyboardOptions = keyboardOptions,
+        modifier = Modifier.width(325.dp),
+        visualTransformation = visualTransformation
     )
 }
 

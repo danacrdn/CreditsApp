@@ -49,4 +49,5 @@
     <string name="unavailable_activities">No hay actividades disponibles</string>
     <string name="no_documents">No hay documentos por descargar</string>
     <string name="sign_in">Regístrate</string>
+    <string name="confirm_password">Confirmar contraseña</string>
 </resources>
