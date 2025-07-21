@@ -50,4 +50,15 @@
     <string name="no_documents">No hay documentos por descargar</string>
     <string name="sign_in">Regístrate</string>
     <string name="confirm_password">Confirmar contraseña</string>
+    <string name="empty_name">El nombre y apellido no pueden estar vacíos.</string>
+    <string name="error_empty_name">El nombre y el apellido no pueden estar vacíos.</string>
+    <string name="error_empty_email">El correo no puede estar vacío.</string>
+    <string name="error_empty_num">El número de control no puede estar vacío.</string>
+    <string name="error_invalid_email">El formato del email es inválido.</string>
+    <string name="error_invalid_semester">Selecciona un semestre válido.</string>
+    <string name="error_invalid_career">Selecciona una carrera válida.</string>
+    <string name="error_invalid_password">La contraseña no puede estar vacía.</string>
+    <string name="error_mismatch_password">Las contraseñas no coinciden.</string>
+    <string name="registration_success">Registro exitoso.</string>
+    <string name="registration_failed">Ocurrió un error en el registro.</string>
 </resources>
