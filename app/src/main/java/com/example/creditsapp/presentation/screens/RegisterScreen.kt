@@ -2,14 +2,18 @@ package com.example.creditsapp.presentation.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -17,6 +21,9 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,91 +46,110 @@ import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.domain.model.Carrera
 import com.example.creditsapp.presentation.navigation.Screen
+import com.example.creditsapp.presentation.viewmodel.RegisterFormEvent
 import com.example.creditsapp.presentation.viewmodel.RegisterViewModel
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 @Composable
 fun RegisterScreen(
     viewModel: RegisterViewModel = viewModel(factory = AppViewModelProvider.Factory),
-    navController: NavController) {
+    navController: NavController
+) {
 
     val uiState by viewModel.uiState.collectAsState()
-    val carreras = uiState.carreras
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(carreras) {
-        println("Carreras obtenidas:")
-        carreras.forEach { println(it) }
+    LaunchedEffect(Unit) {
+        viewModel.snackbarMessage.collect { message ->
+            snackbarHostState.showSnackbar(message)
+        }
     }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background)
-    ) {
-        RegisterText()
-        Spacer(modifier = Modifier.height(20.dp))
-        DataTextField(
-            value = uiState.nombre,
-            onValueChange = viewModel::onNombreChanged,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            labelText = stringResource(R.string.name)
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        DataTextField(
-            value = uiState.apellido,
-            onValueChange = viewModel::onApellidoChanged,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            labelText = stringResource(R.string.last_name)
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        DataTextField(
-            value = uiState.numeroControl,
-            onValueChange = viewModel::onNumeroControl,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            labelText = stringResource(R.string.no_control)
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        DataTextField(
-            value = uiState.email,
-            onValueChange = viewModel::onEmailChanged,
-            KeyboardOptions(keyboardType = KeyboardType.Email),
-            stringResource(R.string.email)
-        )
-        Spacer(modifier = Modifier.height(10.dp))
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
 
-            DropdownSemester(
-                selectedSemester = uiState.semestre,
-                onSemesterSelected = { viewModel.onSemestreChanged(it) }
             )
-
-        Spacer(modifier = Modifier.height(10.dp))
-        DropdownCareers(
-            options = uiState.carreras,
-            selectedCareer = uiState.selectedCareer,
-            onCareerSelected = viewModel::onCareerSelected
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        DataTextField(
-            value = uiState.password,
-            onValueChange = viewModel::onPasswordChanged,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            labelText = stringResource(R.string.password),
-            visualTransformation = PasswordVisualTransformation()
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        DataTextField(
-            value = uiState.confirmPassword,
-            onValueChange = viewModel::onConfirmPasswordChanged,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            labelText = stringResource(R.string.confirm_password),
-            visualTransformation = PasswordVisualTransformation()
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-        ConfirmSignUpButton(viewModel::signUpNewUser)
-        Spacer(modifier = Modifier.height(10.dp))
-        LoginBackButton(navController)
+        },
+        modifier = Modifier.fillMaxSize()
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = MaterialTheme.colorScheme.background)
+            ) {
+                RegisterText()
+                Spacer(modifier = Modifier.height(20.dp))
+                DataTextField(
+                    value = uiState.nombre,
+                    onValueChange = { viewModel.onEvent(RegisterFormEvent.NombreChanged(it)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                    labelText = stringResource(R.string.name)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                DataTextField(
+                    value = uiState.apellido,
+                    onValueChange = { viewModel.onEvent(RegisterFormEvent.ApellidoChanged(it)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                    labelText = stringResource(R.string.last_name)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                DataTextField(
+                    value = uiState.numeroControl,
+                    onValueChange = { viewModel.onEvent(RegisterFormEvent.NumeroControlChanged(it)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    labelText = stringResource(R.string.no_control)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                DataTextField(
+                    value = uiState.email,
+                    onValueChange = { viewModel.onEvent(RegisterFormEvent.EmailChanged(it)) },
+                    KeyboardOptions(keyboardType = KeyboardType.Email),
+                    stringResource(R.string.email)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                DropdownSemester(
+                    selectedSemester = uiState.semestre,
+                    onSemesterSelected = { viewModel.onEvent(RegisterFormEvent.SemestreChanged(it)) }
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                DropdownCareers(
+                    options = uiState.carreras,
+                    selectedCareer = uiState.selectedCareer,
+                    onCareerSelected = { viewModel.onEvent(RegisterFormEvent.CareerSelected(it)) }
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                DataTextField(
+                    value = uiState.password,
+                    onValueChange = { viewModel.onEvent(RegisterFormEvent.PasswordChanged(it)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    labelText = stringResource(R.string.password),
+                    visualTransformation = PasswordVisualTransformation()
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                DataTextField(
+                    value = uiState.confirmPassword,
+                    onValueChange = { viewModel.onEvent(RegisterFormEvent.ConfirmPasswordChanged(it)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    labelText = stringResource(R.string.confirm_password),
+                    visualTransformation = PasswordVisualTransformation()
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                ConfirmSignUpButton(viewModel::signUpNewUser, uiState.isRegistering)
+                Spacer(modifier = Modifier.height(10.dp))
+                LoginBackButton(navController)
+            }
+        }
     }
 }
 
@@ -229,7 +255,7 @@ fun LoginBackButton(navController: NavController) {
 }
 
 @Composable
-fun ConfirmSignUpButton(signUpUser: () -> Unit) {
+fun ConfirmSignUpButton(signUpUser: () -> Unit, isRegistering: Boolean) {
     Button(
         onClick = signUpUser,
         enabled = true,
@@ -237,12 +263,21 @@ fun ConfirmSignUpButton(signUpUser: () -> Unit) {
             .width(325.dp)
             .height(50.dp),
     ) {
-        Text(
-            text = stringResource(R.string.sign_up),
-            style = MaterialTheme.typography.labelLarge
-        )
+        if (isRegistering) {
+            CircularProgressIndicator(
+                color = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(20.dp),
+                strokeWidth = 2.dp
+            )
+        } else {
+            Text(
+                text = stringResource(R.string.sign_up),
+                style = MaterialTheme.typography.labelLarge
+            )
+        }
     }
 }
+
 
 @Composable
 fun DataTextField(

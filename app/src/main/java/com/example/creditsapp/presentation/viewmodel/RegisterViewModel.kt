@@ -6,21 +6,29 @@ import com.example.creditsapp.data.repository.AuthRepository
 import com.example.creditsapp.data.repository.CarreraRepository
 import com.example.creditsapp.domain.model.Carrera
 import com.example.creditsapp.domain.model.RegisterRequest
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class RegisterViewModel(private val carreraRepository: CarreraRepository, private val authRepository: AuthRepository) : ViewModel() {
+class RegisterViewModel(
+    private val carreraRepository: CarreraRepository,
+    private val authRepository: AuthRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
+
+    private val _snackbarMessage = MutableSharedFlow<String>()
+    val snackbarMessage: SharedFlow<String> = _snackbarMessage
 
     init {
         fetchCareers()
 
     }
 
-    private fun fetchCareers(){
+    private fun fetchCareers() {
         viewModelScope.launch {
             try {
                 val result = carreraRepository.getCarreras()
@@ -33,79 +41,100 @@ class RegisterViewModel(private val carreraRepository: CarreraRepository, privat
         }
     }
 
-    fun signUpNewUser(){
+    fun signUpNewUser() {
         viewModelScope.launch {
-            try {
-                _uiState.value = _uiState.value.copy(
-                    isRegistering = true,
-                    registrationError = null,
-                    registrationSuccess = false
-                )
-                val currentUiState = _uiState.value
-                val selectedCareer = currentUiState.selectedCareer
-                val selectedSemester = currentUiState.semestre
-                if (selectedCareer == null || selectedSemester == null ) {
-                    println("Error: No se ha seleccionado una carrera.")
-                    return@launch
+            _uiState.value = _uiState.value.copy(
+                isRegistering = true,
+                registrationError = null,
+                registrationSuccess = false
+            )
+            val state = _uiState.value
+            when (val validation = validateForm(state)) {
+                is ValidationResult.Success -> {
+                    val registerRequest = RegisterRequest(
+                        email = state.email,
+                        password = state.password,
+                        confirmPassword = state.confirmPassword,
+                        numeroControl = state.numeroControl,
+                        nombre = state.nombre,
+                        apellido = state.apellido,
+                        semestre = state.semestre!!,
+                        totalCreditos = 0.0,
+                        carreraId = state.selectedCareer!!.id
+                    )
+
+                    try {
+                        println("Request: $registerRequest")
+                        val result = authRepository.register(registerRequest)
+                        println("Registro exitoso: $result")
+                        showError("Registro exitoso.")
+
+                        _uiState.value = _uiState.value.copy(
+                            isRegistering = false,
+                            registrationSuccess = true
+                        )
+
+                    } catch (e: Exception) {
+                        showError("Error al registrar nuevo usuario.")
+                        println("Error al registrar nuevo usuario: ${e.message}")
+
+                    }
                 }
-
-                val registerRequest = RegisterRequest(
-                    email = currentUiState.email,
-                    password = currentUiState.password,
-                    confirmPassword = currentUiState.confirmPassword,
-                    numeroControl = currentUiState.numeroControl,
-                    nombre = currentUiState.nombre,
-                    apellido = currentUiState.apellido,
-                    semestre = currentUiState.semestre,
-                    totalCreditos = 0.0,
-                    carreraId = currentUiState.selectedCareer.id
-                )
-                println("Request: $registerRequest")
-                val result = authRepository.register(registerRequest)
-
-                println("Registro exitoso: $result")
-                _uiState.value = _uiState.value.copy(
-                    isRegistering = false,
-                    registrationSuccess = true
-                )
-            } catch (e: Exception) {
-                println("Error al registrar nuevo usuario: ${e.message}")
+                is ValidationResult.Error -> {
+                    viewModelScope.launch {
+                        showError(validation.message)
+                    }
+                }
             }
         }
     }
 
-    fun onEmailChanged(newValue: String){
-        _uiState.value = _uiState.value.copy(email = newValue)
+    private suspend fun showError(message: String) {
+        _uiState.value = _uiState.value.copy(isRegistering = false)
+        _snackbarMessage.emit(message)
     }
 
-    fun onPasswordChanged(newValue: String){
-        _uiState.value = _uiState.value.copy(password = newValue)
+    private fun validateForm(state: RegisterUiState): ValidationResult {
+        return when {
+            state.nombre.isBlank() || state.apellido.isBlank() ->
+                ValidationResult.Error("Nombre y apellido son obligatorios.")
+
+            state.email.isBlank() ->
+                ValidationResult.Error("El correo no puede estar vacío.")
+            state.numeroControl.isBlank() ->
+                ValidationResult.Error("El número de control es obligatorio.")
+
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(state.email).matches() ->
+                ValidationResult.Error("Formato de correo inválido.")
+
+            state.semestre == null || state.semestre <= 0 ->
+                ValidationResult.Error("Selecciona un semestre válido.")
+
+            state.selectedCareer == null ->
+                ValidationResult.Error("Selecciona una carrera.")
+            state.password.isBlank() || state.confirmPassword.isBlank() ->
+                ValidationResult.Error("La contraseña no puede estar vacía.")
+
+            state.password != state.confirmPassword ->
+                ValidationResult.Error("Las contraseñas no coinciden.")
+            else -> ValidationResult.Success
+        }
     }
 
-    fun onConfirmPasswordChanged(newValue: String){
-        _uiState.value = _uiState.value.copy(confirmPassword = newValue)
+
+    fun onEvent(event: RegisterFormEvent) {
+        _uiState.value = when (event) {
+            is RegisterFormEvent.EmailChanged -> _uiState.value.copy(email = event.value)
+            is RegisterFormEvent.PasswordChanged -> _uiState.value.copy(password = event.value)
+            is RegisterFormEvent.ConfirmPasswordChanged -> _uiState.value.copy(confirmPassword = event.value)
+            is RegisterFormEvent.NumeroControlChanged -> _uiState.value.copy(numeroControl = event.value)
+            is RegisterFormEvent.NombreChanged -> _uiState.value.copy(nombre = event.value)
+            is RegisterFormEvent.ApellidoChanged -> _uiState.value.copy(apellido = event.value)
+            is RegisterFormEvent.SemestreChanged -> _uiState.value.copy(semestre = event.value)
+            is RegisterFormEvent.CareerSelected -> _uiState.value.copy(selectedCareer = event.career)
+        }
     }
 
-    fun onNumeroControl(newValue: String){
-        _uiState.value = _uiState.value.copy(numeroControl = newValue)
-    }
-
-    fun onNombreChanged(newValue: String){
-        _uiState.value = _uiState.value.copy(nombre = newValue)
-    }
-
-    fun onApellidoChanged(newValue: String){
-        _uiState.value = _uiState.value.copy(apellido = newValue)
-    }
-
-    fun onSemestreChanged(newValue: Int) {
-        _uiState.value = _uiState.value.copy(semestre = newValue)
-    }
-
-
-    fun onCareerSelected(career: Carrera) {
-        _uiState.value = _uiState.value.copy(selectedCareer = career)
-    }
 
 }
 
@@ -127,3 +156,19 @@ data class RegisterUiState(
     val registrationError: String? = null, // Para mostrar errores de registro
     val registrationSuccess: Boolean = false // Para indicar éxito
 )
+
+sealed class ValidationResult {
+    object Success : ValidationResult()
+    data class Error(val message: String) : ValidationResult()
+}
+
+sealed class RegisterFormEvent {
+    data class EmailChanged(val value: String) : RegisterFormEvent()
+    data class PasswordChanged(val value: String) : RegisterFormEvent()
+    data class ConfirmPasswordChanged(val value: String) : RegisterFormEvent()
+    data class NumeroControlChanged(val value: String) : RegisterFormEvent()
+    data class NombreChanged(val value: String) : RegisterFormEvent()
+    data class ApellidoChanged(val value: String) : RegisterFormEvent()
+    data class SemestreChanged(val value: Int) : RegisterFormEvent()
+    data class CareerSelected(val career: Carrera) : RegisterFormEvent()
+}
