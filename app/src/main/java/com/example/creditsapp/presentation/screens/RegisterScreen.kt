@@ -51,7 +51,6 @@ import com.example.creditsapp.presentation.viewmodel.RegisterViewModel
 import com.example.creditsapp.presentation.viewmodel.UiMessageEvent
 import com.example.creditsapp.presentation.viewmodel.ValidationErrorType
 import com.example.creditsapp.ui.theme.CreditsAppTheme
-import kotlinx.coroutines.flow.SharedFlow
 
 @Composable
 fun RegisterScreen(
