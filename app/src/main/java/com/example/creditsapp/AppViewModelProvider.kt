@@ -72,8 +72,8 @@ object AppViewModelProvider {
 
         initializer {
             LoginViewModel(
-                usersRepository = creditsApp().container.usersRepository,
-                userPreferences = creditsApp().container.userPreferences
+                userPreferences = creditsApp().container.userPreferences,
+                authRepository = creditsApp().container.authRepository
             )
         }
 

@@ -20,8 +20,8 @@ class RegisterViewModel(
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
 
-    private val _snackbarMessage = MutableSharedFlow<UiMessageEvent>()
-    val snackbarMessage: SharedFlow<UiMessageEvent> = _snackbarMessage
+    private val _snackbarMessage = MutableSharedFlow<RegisterUiMessageEvent>()
+    val snackbarMessage: SharedFlow<RegisterUiMessageEvent> = _snackbarMessage
 
     init {
         fetchCareers()
@@ -48,6 +48,7 @@ class RegisterViewModel(
                 registrationError = null,
                 registrationSuccess = false
             )
+
             val state = _uiState.value
             when (val validation = validateForm(state)) {
                 is ValidationResult.Success -> {
@@ -67,7 +68,7 @@ class RegisterViewModel(
                         println("Request: $registerRequest")
                         val result = authRepository.register(registerRequest)
                         println("Registro exitoso: $result")
-                        _snackbarMessage.emit(UiMessageEvent.RegistrationSuccess)
+                        _snackbarMessage.emit(RegisterUiMessageEvent.RegistrationSuccess)
 
                         _uiState.value = _uiState.value.copy(
                             isRegistering = false,
@@ -76,7 +77,7 @@ class RegisterViewModel(
 
                     } catch (e: Exception) {
                         println("Error al registrar nuevo usuario: ${e.message}")
-                        _snackbarMessage.emit(UiMessageEvent.RegistrationFailed)
+                        _snackbarMessage.emit(RegisterUiMessageEvent.RegistrationFailed)
 
                     }
                 }
@@ -90,36 +91,36 @@ class RegisterViewModel(
         }
     }
 
-    private suspend fun showError(errorType: ValidationErrorType) {
+    private suspend fun showError(errorType: RegisterValidationErrorType) {
         _uiState.value = _uiState.value.copy(isRegistering = false)
-        _snackbarMessage.emit(UiMessageEvent.ValidationError(errorType))
+        _snackbarMessage.emit(RegisterUiMessageEvent.ValidationError(errorType))
     }
 
-    private fun validateForm(state: RegisterUiState): ValidationResult {
+    private fun validateForm(state: RegisterUiState): ValidationResult<RegisterValidationErrorType> {
         return when {
             state.nombre.isBlank() || state.apellido.isBlank() ->
-                ValidationResult.Error(ValidationErrorType.EMPTY_NAME)
+                ValidationResult.Error(RegisterValidationErrorType.EMPTY_NAME)
 
             state.numeroControl.isBlank() ->
-                ValidationResult.Error(ValidationErrorType.EMPTY_NOCONTROL)
+                ValidationResult.Error(RegisterValidationErrorType.EMPTY_NOCONTROL)
 
             state.email.isBlank() ->
-                ValidationResult.Error(ValidationErrorType.EMPTY_EMAIL)
+                ValidationResult.Error(RegisterValidationErrorType.EMPTY_EMAIL)
 
             !android.util.Patterns.EMAIL_ADDRESS.matcher(state.email).matches() ->
-                ValidationResult.Error(ValidationErrorType.INVALID_EMAIL)
+                ValidationResult.Error(RegisterValidationErrorType.INVALID_EMAIL)
 
             state.semestre == null || state.semestre <= 0 ->
-                ValidationResult.Error(ValidationErrorType.INVALID_SEMESTER)
+                ValidationResult.Error(RegisterValidationErrorType.INVALID_SEMESTER)
 
             state.selectedCareer == null ->
-                ValidationResult.Error(ValidationErrorType.INVALID_CAREER)
+                ValidationResult.Error(RegisterValidationErrorType.INVALID_CAREER)
 
             state.password.isBlank() || state.confirmPassword.isBlank() ->
-                ValidationResult.Error(ValidationErrorType.EMPTY_PASSWORD)
+                ValidationResult.Error(RegisterValidationErrorType.EMPTY_PASSWORD)
 
             state.password != state.confirmPassword ->
-                ValidationResult.Error(ValidationErrorType.PASSWORD_MISMATCH)
+                ValidationResult.Error(RegisterValidationErrorType.PASSWORD_MISMATCH)
 
             else -> ValidationResult.Success
         }
@@ -159,12 +160,13 @@ data class RegisterUiState(
     val registrationSuccess: Boolean = false
 )
 
-sealed class ValidationResult {
-    object Success : ValidationResult()
-    data class Error(val errorType: ValidationErrorType) : ValidationResult()
+sealed class ValidationResult<out T> {
+    object Success : ValidationResult<Nothing>()
+    data class Error<T>(val errorType: T) : ValidationResult<T>()
 }
 
-enum class ValidationErrorType {
+
+enum class RegisterValidationErrorType {
     EMPTY_NAME,
     EMPTY_EMAIL,
     EMPTY_NOCONTROL,
@@ -186,8 +188,8 @@ sealed class RegisterFormEvent {
     data class CareerSelected(val career: Carrera) : RegisterFormEvent()
 }
 
-sealed class UiMessageEvent {
-    data class ValidationError(val type: ValidationErrorType) : UiMessageEvent()
-    object RegistrationSuccess : UiMessageEvent()
-    object RegistrationFailed : UiMessageEvent()
+sealed class RegisterUiMessageEvent {
+    data class ValidationError(val type: RegisterValidationErrorType) : RegisterUiMessageEvent()
+    object RegistrationSuccess : RegisterUiMessageEvent()
+    object RegistrationFailed : RegisterUiMessageEvent()
 }

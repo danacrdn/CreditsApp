@@ -47,9 +47,9 @@ import com.example.creditsapp.R
 import com.example.creditsapp.domain.model.Carrera
 import com.example.creditsapp.presentation.navigation.Screen
 import com.example.creditsapp.presentation.viewmodel.RegisterFormEvent
+import com.example.creditsapp.presentation.viewmodel.RegisterUiMessageEvent
+import com.example.creditsapp.presentation.viewmodel.RegisterValidationErrorType
 import com.example.creditsapp.presentation.viewmodel.RegisterViewModel
-import com.example.creditsapp.presentation.viewmodel.UiMessageEvent
-import com.example.creditsapp.presentation.viewmodel.ValidationErrorType
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 @Composable
@@ -75,18 +75,18 @@ fun RegisterScreen(
     LaunchedEffect(Unit) {
         viewModel.snackbarMessage.collect { event ->
             val text = when (event) {
-                is UiMessageEvent.ValidationError -> when (event.type) {
-                    ValidationErrorType.EMPTY_NAME -> emptyNameMsg
-                    ValidationErrorType.EMPTY_EMAIL -> emptyEmailMsg
-                    ValidationErrorType.EMPTY_NOCONTROL -> emptyNumControlMsg
-                    ValidationErrorType.INVALID_EMAIL -> invalidEmailMsg
-                    ValidationErrorType.INVALID_SEMESTER -> invalidSemesterMsg
-                    ValidationErrorType.INVALID_CAREER -> invalidCareerMsg
-                    ValidationErrorType.EMPTY_PASSWORD -> invalidPasswordMsg
-                    ValidationErrorType.PASSWORD_MISMATCH -> mismatchPasswordMsg
+                is RegisterUiMessageEvent.ValidationError -> when (event.type) {
+                    RegisterValidationErrorType.EMPTY_NAME -> emptyNameMsg
+                    RegisterValidationErrorType.EMPTY_EMAIL -> emptyEmailMsg
+                    RegisterValidationErrorType.EMPTY_NOCONTROL -> emptyNumControlMsg
+                    RegisterValidationErrorType.INVALID_EMAIL -> invalidEmailMsg
+                    RegisterValidationErrorType.INVALID_SEMESTER -> invalidSemesterMsg
+                    RegisterValidationErrorType.INVALID_CAREER -> invalidCareerMsg
+                    RegisterValidationErrorType.EMPTY_PASSWORD -> invalidPasswordMsg
+                    RegisterValidationErrorType.PASSWORD_MISMATCH -> mismatchPasswordMsg
                 }
-                is UiMessageEvent.RegistrationSuccess -> regSuccessMsg
-                is UiMessageEvent.RegistrationFailed -> regFailedMsg
+                is RegisterUiMessageEvent.RegistrationSuccess -> regSuccessMsg
+                is RegisterUiMessageEvent.RegistrationFailed -> regFailedMsg
             }
             snackbarHostState.showSnackbar(text)
         }

@@ -66,8 +66,12 @@ class DefaultAppContainer (context: Context): AppContainer {
     // API de backend
     private val NEW_BASE_URL = "http://10.0.2.2:5091/"
 
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
+
     private val backendRetrofit: Retrofit = Retrofit.Builder()
-        .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
+        .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .baseUrl(NEW_BASE_URL)
         .build()
 

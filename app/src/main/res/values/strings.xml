@@ -50,7 +50,6 @@
     <string name="no_documents">No hay documentos por descargar</string>
     <string name="sign_in">Regístrate</string>
     <string name="confirm_password">Confirmar contraseña</string>
-    <string name="empty_name">El nombre y apellido no pueden estar vacíos.</string>
     <string name="error_empty_name">El nombre y el apellido no pueden estar vacíos.</string>
     <string name="error_empty_email">El correo no puede estar vacío.</string>
     <string name="error_empty_num">El número de control no puede estar vacío.</string>
@@ -61,4 +60,8 @@
     <string name="error_mismatch_password">Las contraseñas no coinciden.</string>
     <string name="registration_success">Registro exitoso.</string>
     <string name="registration_failed">Ocurrió un error en el registro.</string>
+    <string name="error_empty_username">Ingresa tu numero de control</string>
+    <string name="error_incorrect_password">La contraseña que ingresaste es incorrecta.</string>
+    <string name="login_failed">El inicio de sesión ha fallado.</string>
+    <string name="success_login">¡Inicio de sesión correcto!</string>
 </resources>
