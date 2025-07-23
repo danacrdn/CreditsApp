@@ -3,6 +3,7 @@ package com.example.creditsapp.data.network
 import com.example.creditsapp.domain.model.Actividad
 import com.example.creditsapp.domain.model.Alumno
 import com.example.creditsapp.domain.model.AlumnoActividad
+import com.example.creditsapp.domain.model.AlumnoUpdate
 import com.example.creditsapp.domain.model.Carrera
 import com.example.creditsapp.domain.model.Inscripcion
 import com.example.creditsapp.domain.model.LoginRequest
@@ -27,7 +28,7 @@ interface BackendApiService {
     suspend fun getAlumnoById(@Path("id") id: Int): Alumno
 
     @PUT("/api/Alumno")
-    suspend fun updateAlumno(): Alumno
+    suspend fun updateAlumno(@Body update: AlumnoUpdate): Alumno
 
     // Actividad
     @GET("/api/Actividades")

@@ -12,6 +12,7 @@ data class Alumno (
     val fechaRegistro: String,
     val semestre: Int,
     val totalCreditos: Double,
+    val carreraNombre: String,
     val carreraId: Int
 )
 
@@ -22,5 +23,8 @@ data class AlumnoUpdate (
     val apellido: String,
     val semestre: Int,
     val totalCreditos: Double,
-    val carreraId: Int
+    val carreraId: Int,
+    val correoElectronico: String,
+    val currentPassword: String,
+    val newPassword: String
 )

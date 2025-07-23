@@ -46,6 +46,7 @@ import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
+import com.example.creditsapp.presentation.viewmodel.ProfileEditEvent
 import com.example.creditsapp.presentation.viewmodel.ProfileViewModel
 import com.example.creditsapp.presentation.viewmodel.SessionViewModel
 import com.example.creditsapp.ui.theme.CreditsAppTheme
@@ -57,10 +58,8 @@ fun ProfileScreen(
     sessionViewModel: SessionViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
 
-    val profileUiState by viewModel.profileUiState.collectAsState()
-    val isEditing by viewModel.isEditing.collectAsState()
-    val editableData by viewModel.editableData.collectAsState()
     val isDarkMode by sessionViewModel.isDarkMode.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     /* Launched effect that listens the flow of navigation from the viewmodel.
     When viewmodel emits true to navigateToLogin, then navigates to login screen.
@@ -87,7 +86,7 @@ fun ProfileScreen(
                     .verticalScroll(rememberScrollState())
             ) {
 
-                profileUiState.profileData?.let { ProfilePictureAndName(it.firstName) }
+                uiState.profileData?.let { ProfilePictureAndName(it.nombre) }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -100,7 +99,7 @@ fun ProfileScreen(
                         SectionText(title = stringResource(R.string.personal_information))
                         Spacer(modifier = Modifier.weight(1f))
 
-                        if (!isEditing) {
+                        if (!uiState.isEditing) {
                             IconButton(onClick = { viewModel.startEditing() }) {
                                 Icon(
                                     imageVector = Icons.Rounded.Edit,
@@ -111,28 +110,28 @@ fun ProfileScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    profileUiState.profileData?.let {
+                    uiState.profileData?.let {
                         ProfileOption(
                             title = stringResource(R.string.name),
-                            isEditing = isEditing,
-                            value = (if (isEditing) editableData.firstName else it.firstName),
-                            onValueChanged = { viewModel.updateValue("firstName", it) }
+                            isEditing = uiState.isEditing,
+                            value = (if (uiState.isEditing) uiState.editableProfileData.nombre else it.nombre),
+                            onValueChanged = { viewModel.onEvent(ProfileEditEvent.NombreChanged(it))}
                         )
                     }
-                    profileUiState.profileData?.let {
+                    uiState.profileData?.let {
                         ProfileOption(
                             title = stringResource(R.string.degree_name),
-                            isEditing = isEditing,
-                            value = (if (isEditing) editableData.degreeName else it.degreeName),
-                            onValueChanged = { viewModel.updateValue("degreeName", it) }
+                            isEditing = uiState.isEditing,
+                            value = "",
+                            onValueChanged = {  }
                         )
                     }
-                    profileUiState.profileData?.let {
+                    uiState.profileData?.let {
                         ProfileOption(
                             title = stringResource(R.string.email),
-                            isEditing = isEditing,
-                            value = (if (isEditing) editableData.email else it.email),
-                            onValueChanged = { viewModel.updateValue("email", it) }
+                            isEditing = uiState.isEditing,
+                            value = (if (uiState.isEditing) uiState.editableProfileData.correoElectronico else it.correoElectronico),
+                            onValueChanged = { viewModel.onEvent(ProfileEditEvent.EmailChanged(it)) }
                         )
                     }
                 }
@@ -146,7 +145,7 @@ fun ProfileScreen(
                         title = stringResource(R.string.language), value = stringResource(
                             R.string.spanish
                         ),
-                        isEditing = isEditing,
+                        isEditing = uiState.isEditing,
                         onValueChanged = {}
                     )
                     ProfileSwitchOption(
@@ -162,19 +161,19 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     ProfileOptionPassword(
                         title = stringResource(R.string.password),
-                        isEditing = isEditing,
-                        value = (if (isEditing) editableData.password else "*****"),
-                        onValueChanged = { viewModel.updateValue("password", it) }
+                        isEditing = uiState.isEditing,
+                        value = (if (uiState.isEditing) uiState.editableProfileData.currentPassword else "*****"),
+                        onValueChanged = { viewModel.onEvent(ProfileEditEvent.PasswordChanged(it)) }
                     )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                if (!isEditing) {
+                if (!uiState.isEditing) {
                     LogOutOption(onClick = { viewModel.logOut() })
                 } else {
                     Row {
-                        SaveButton { viewModel.saveEditing() }
+                        SaveButton { viewModel.saveNewData() }
                         Spacer(modifier = Modifier.width(16.dp))
                         CancelButton { viewModel.cancelEditing() }
                     }

@@ -63,7 +63,7 @@ object AppViewModelProvider {
 
         initializer {
             ProfileViewModel(
-                usersRepository = creditsApp().container.usersRepository,
+                alumnoRepository = creditsApp().container.alumnosRepository,
                 userPreferences = creditsApp().container.userPreferences
             )
         }
