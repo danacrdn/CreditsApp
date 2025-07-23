@@ -21,6 +21,10 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>, a
         val IS_DARK_MODE = booleanPreferencesKey("is_dark_mode")
     }
 
+    val id: Flow<Int?> = dataStore.data
+        .map { prefs -> prefs[USER_ID_KEY] }
+
+
     val userId: StateFlow<Int?> = dataStore.data
         .map { prefs -> prefs[USER_ID_KEY] }
         .stateIn(

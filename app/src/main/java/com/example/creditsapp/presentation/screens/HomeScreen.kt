@@ -57,7 +57,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
 
-    val homeUiState by viewModel.homeUiState.collectAsState()
+    val homeUiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -75,9 +75,9 @@ fun HomeScreen(
                     .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
             ) {
-                StudentInfo(homeUiState.userCredits.name)
+                StudentInfo(homeUiState.name)
                 Spacer(modifier = Modifier.height(20.dp))
-                CreditsCard(homeUiState.userCredits.totalCredits.toString())
+                CreditsCard(homeUiState.totalCredits.toString())
                 Spacer(modifier = Modifier.height(20.dp))
                 OptionsGrid(navController)
                 Spacer(modifier = Modifier.height(8.dp))

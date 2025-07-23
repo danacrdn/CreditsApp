@@ -80,6 +80,15 @@ fun LoginScreen(
         }
     }
 
+    LaunchedEffect(uiState.loginSuccess) {
+        if (uiState.loginSuccess) {
+            navController.navigate(Screen.Home.name) {
+                popUpTo(Screen.Login.name) { inclusive = true }
+            }
+            viewModel.resetLoginSuccess()
+        }
+    }
+
     Scaffold(
         snackbarHost = {
             SnackbarHost(
@@ -123,14 +132,7 @@ fun LoginScreen(
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 LoginButton(
-                    validateCredentials = {
-                        viewModel.logIn()
-                        if (uiState.loginSuccess){
-                            navController.navigate(Screen.Home.name) {
-                                popUpTo(Screen.Login.name) { inclusive = true }
-                            }
-                        }
-                    }
+                    validateCredentials = { viewModel.logIn() }
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 ForgotPasswordText()

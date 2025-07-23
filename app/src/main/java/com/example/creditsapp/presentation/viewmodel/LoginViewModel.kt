@@ -79,6 +79,10 @@ class LoginViewModel(
             else -> ValidationResult.Success
         }
     }
+
+    fun resetLoginSuccess() {
+        _uiState.value = _uiState.value.copy(loginSuccess = false)
+    }
 }
 
 sealed class LoginUiMessageEvent {

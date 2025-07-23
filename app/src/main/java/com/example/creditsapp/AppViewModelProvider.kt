@@ -26,9 +26,7 @@ object AppViewModelProvider {
 
         initializer {
             HomeViewModel(
-                usersRepository = creditsApp().container.usersRepository,
                 alumnosRepository = creditsApp().container.alumnosRepository,
-                actividadesRepository = creditsApp().container.actividadesRepository,
                 userPreferences = creditsApp().container.userPreferences,
             )
         }
