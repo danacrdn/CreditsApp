@@ -19,6 +19,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -31,6 +35,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -120,18 +127,54 @@ fun ProfileScreen(
                     }
                     uiState.profileData?.let {
                         ProfileOption(
-                            title = stringResource(R.string.degree_name),
+                            title = stringResource(R.string.last_name),
                             isEditing = uiState.isEditing,
-                            value = "",
-                            onValueChanged = {  }
+                            value = (if (uiState.isEditing) uiState.editableProfileData.apellido else it.apellido),
+                            onValueChanged = { viewModel.onEvent(ProfileEditEvent.ApellidoChanged(it))}
                         )
                     }
+                    uiState.profileData?.let {
+                        ProfileOption(
+                            title = stringResource(R.string.no_control),
+                            isEditing = uiState.isEditing,
+                            value = it.numeroControl,
+                            onValueChanged = { /* No se edita */}
+                        )
+                    }
+
                     uiState.profileData?.let {
                         ProfileOption(
                             title = stringResource(R.string.email),
                             isEditing = uiState.isEditing,
                             value = (if (uiState.isEditing) uiState.editableProfileData.correoElectronico else it.correoElectronico),
                             onValueChanged = { viewModel.onEvent(ProfileEditEvent.EmailChanged(it)) }
+                        )
+                    }
+                    uiState.profileData?.let {
+                        ProfileOption(
+                            title = stringResource(R.string.semester),
+                            isEditing = uiState.isEditing,
+                            value = "",
+                            onValueChanged = {  }
+                        )
+                    }
+
+                    val selectedCarrera = if (uiState.isEditing) {
+                        uiState.editableProfileData.carrera
+                    } else {
+                        uiState.carreras.find { it.nombre == uiState.profileData?.carreraNombre }
+                    }
+
+                    selectedCarrera?.let { carrera ->
+                        DropdownOption(
+                            title = stringResource(R.string.degree_name),
+                            options = uiState.carreras,
+                            isEditing = uiState.isEditing,
+                            selectedOption = carrera,
+                            onOptionSelected = { selected ->
+                                viewModel.onEvent(ProfileEditEvent.CarreraChanged(selected))
+                            },
+                            optionLabel = { it.nombre }
                         )
                     }
                 }
@@ -165,6 +208,12 @@ fun ProfileScreen(
                         value = (if (uiState.isEditing) uiState.editableProfileData.currentPassword else "*****"),
                         onValueChanged = { viewModel.onEvent(ProfileEditEvent.PasswordChanged(it)) }
                     )
+                    ProfileOptionPassword(
+                        title = stringResource(R.string.confirm_password),
+                        isEditing = uiState.isEditing,
+                        value = (if (uiState.isEditing) uiState.editableProfileData.newPassword else "*****"),
+                        onValueChanged = { viewModel.onEvent(ProfileEditEvent.ConfirmPasswordChanged(it)) }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -182,6 +231,80 @@ fun ProfileScreen(
         }
     )
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun <T> DropdownOption(
+    title: String,
+    isEditing: Boolean,
+    options: List<T>,
+    selectedOption: T?,
+    onOptionSelected: (T) -> Unit,
+    optionLabel: (T) -> String,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.weight(1f)
+        )
+        if (isEditing) {
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded },
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(4.dp)
+            ) {
+                OutlinedTextField(
+                    value = selectedOption?.let { optionLabel(it) } ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    placeholder = { Text("Selecciona una opción") },
+                    shape = RoundedCornerShape(30.dp),
+                    singleLine = true,
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth(),
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                    },
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    options.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(optionLabel(option)) },
+                            onClick = {
+                                onOptionSelected(option)
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+        } else {
+            if (selectedOption != null) {
+                Text(
+                    text = optionLabel(selectedOption),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun CancelButton(onClick: () -> Unit) {

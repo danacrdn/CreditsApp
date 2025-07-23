@@ -12,7 +12,7 @@ data class Alumno (
     val fechaRegistro: String,
     val semestre: Int,
     val totalCreditos: Double,
-    val carreraNombre: String,
+    val carreraNombre: String? = null,
     val carreraId: Int
 )
 

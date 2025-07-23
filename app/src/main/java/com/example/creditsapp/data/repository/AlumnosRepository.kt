@@ -7,7 +7,7 @@ import com.example.creditsapp.domain.model.AlumnoUpdate
 interface AlumnosRepository {
     suspend fun getAlumnos(): List<Alumno>
     suspend fun getAlumnoById(id: Int): Alumno
-    suspend fun updateAlumno(update: AlumnoUpdate): Alumno
+    suspend fun updateAlumno(id: Int, update: AlumnoUpdate): Alumno
 }
 
 class DefaultAlumnosRepository(private val apiService: BackendApiService) : AlumnosRepository {
@@ -15,5 +15,5 @@ class DefaultAlumnosRepository(private val apiService: BackendApiService) : Alum
 
     override suspend fun getAlumnoById(id: Int): Alumno = apiService.getAlumnoById(id)
 
-    override suspend fun updateAlumno(update: AlumnoUpdate): Alumno = apiService.updateAlumno(update)
+    override suspend fun updateAlumno(id: Int, update: AlumnoUpdate): Alumno = apiService.updateAlumno(id, update)
 }

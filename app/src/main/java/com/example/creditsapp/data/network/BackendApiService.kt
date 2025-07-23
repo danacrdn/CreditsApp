@@ -27,8 +27,11 @@ interface BackendApiService {
     @GET("/api/Alumno/{id}")
     suspend fun getAlumnoById(@Path("id") id: Int): Alumno
 
-    @PUT("/api/Alumno")
-    suspend fun updateAlumno(@Body update: AlumnoUpdate): Alumno
+    @PUT("/api/Alumno/{id}")
+    suspend fun updateAlumno(
+        @Path("id") id: Int,
+        @Body update: AlumnoUpdate
+    ): Alumno
 
     // Actividad
     @GET("/api/Actividades")
