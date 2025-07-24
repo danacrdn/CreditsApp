@@ -33,7 +33,6 @@ object AppViewModelProvider {
 
         initializer {
             ActivitiesViewModel(
-                activitiesRepository = creditsApp().container.activitiesRepository,
                 actividadesRepository = creditsApp().container.actividadesRepository
             )
         }

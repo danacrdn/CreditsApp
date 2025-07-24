@@ -20,4 +20,5 @@ data class Actividad (
     val departamentoId: Int,
     val departamentoNombre: String,
     val carreraNombres: List<String>
+
 )

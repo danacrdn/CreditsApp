@@ -154,17 +154,34 @@ fun PostCard(
 
 @Composable
 fun LoadingScreen() {
-    CircularProgressIndicator(
-        modifier = Modifier.width(64.dp),
-        color = MaterialTheme.colorScheme.secondary,
-        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-    )
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxSize()
+
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.width(64.dp),
+            color = MaterialTheme.colorScheme.secondary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        )
+    }
 }
 
 @Composable
 fun ErrorScreen() {
-    Text(stringResource(R.string.error))
-    Button(onClick = {}) {
-        Text(stringResource(R.string.retry))
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxSize()
+
+    ) {
+        Text(stringResource(R.string.error))
+        Spacer(Modifier.height(10.dp))
+        Button(onClick = {}) {
+            Text(stringResource(R.string.retry))
+        }
     }
 }

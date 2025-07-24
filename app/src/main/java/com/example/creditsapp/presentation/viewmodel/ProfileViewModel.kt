@@ -34,7 +34,7 @@ class ProfileViewModel(
                 val response = alumnoRepository.getAlumnoById(id)
                 println("Datos del alumno: $response")
 
-                val carreras = uiState.value.carreras
+                val carreras = _uiState.value.carreras
                 val carrera = carreras.find { it.id == response.carreraId }
 
                 _uiState.value = _uiState.value.copy(
@@ -71,8 +71,8 @@ class ProfileViewModel(
     * to observable value _editableData, which is of type EditableProfileData. This data class temporarily
     * stores the values before they are updated */
     fun startEditing() {
-        val carreras = uiState.value.carreras
-        val currentData = uiState.value.profileData
+        val carreras = _uiState.value.carreras
+        val currentData = _uiState.value.profileData
         if (currentData != null) {
             _uiState.value = _uiState.value.copy(
                 isEditing = true,
@@ -122,6 +122,8 @@ class ProfileViewModel(
                         isEditing = false,
                         profileData = result
                     )
+
+                    _uiState.value.profileData?.let { fetchAlumnoData(it.id) }
                 } catch (e: Exception) {
                     println("No se pudo actualizar el alumno $e")
                 }

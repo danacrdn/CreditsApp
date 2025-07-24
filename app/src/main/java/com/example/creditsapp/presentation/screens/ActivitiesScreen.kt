@@ -1,5 +1,7 @@
 package com.example.creditsapp.presentation.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -50,24 +52,23 @@ import com.example.creditsapp.domain.model.Actividad
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
 import com.example.creditsapp.presentation.utilities.formatDate
+import com.example.creditsapp.presentation.utilities.formatFecha
 import com.example.creditsapp.presentation.viewmodel.ActividadesUiState
 import com.example.creditsapp.presentation.viewmodel.ActivitiesViewModel
 import com.example.creditsapp.presentation.viewmodel.SortOption
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ActivitiesScreen(
     navController: NavController,
     viewModel: ActivitiesViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val activities by viewModel.activities.collectAsState()
-    val selectedCredits by viewModel.selectedCredits.collectAsState()
-    val sortOption by viewModel.sortOption.collectAsState()
 
-    val actividadesUiState = viewModel.actividadesUiState
+    val uiState by viewModel.uiState.collectAsState()
 
     var showCreditsOptions by remember { mutableStateOf(false) }
     var isSortOptionExpanded by remember { mutableStateOf(false) }
-
 
     Scaffold(
         topBar = {
@@ -76,55 +77,48 @@ fun ActivitiesScreen(
                 navigateToProfile = { navController.navigate(Screen.Profile.name) })
         },
         content = { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp)
+            ) {
+                when (val state = uiState) {
+                    ActividadesUiState.Error -> ErrorScreen()
+                    ActividadesUiState.Loading -> LoadingScreen()
+                    is ActividadesUiState.Success -> {
 
-            if (activities.activitiesList.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(stringResource(R.string.unavailable_activities))
-                }
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(horizontal = 16.dp)
-                ) {
-                    Box(Modifier.fillMaxWidth()) {
-                        FilterCreditsBar(
-                            selectedCredits = selectedCredits,
-                            onToggleCreditValue = { credit -> viewModel.toggleCreditFilter(credit) },
-                            isCreditsExpanded = showCreditsOptions,
-                            onCreditsExpandToggle = { showCreditsOptions = !showCreditsOptions },
-                            modifier = Modifier.align(Alignment.TopStart)
-                        )
-
-                        Spacer(Modifier.width(8.dp))
-
-                        SortByBar(
-                            isSortOptionExpanded = isSortOptionExpanded,
-                            onSortExpandToggle = { isSortOptionExpanded = !isSortOptionExpanded },
-                            selectedSortOption = sortOption,
-                            onSelectSortOption = { viewModel.setSortOption(it) },
-                            modifier = Modifier.align(Alignment.TopEnd)
-                        )
-
-                    }
-                    when (actividadesUiState) {
-                        ActividadesUiState.Error -> ErrorScreen()
-                        ActividadesUiState.Loading -> LoadingScreen()
-                        is ActividadesUiState.Success -> {
-                            ActividadItem(navController, actividadesUiState.actividades)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            FilterCreditsBar(
+                                selectedCredits = state.selectedCredits,
+                                onToggleCreditValue = { credit -> viewModel.onCreditToggle(credit) },
+                                isCreditsExpanded = showCreditsOptions,
+                                onCreditsExpandToggle = { showCreditsOptions = !showCreditsOptions },
+                            )
+                            SortByBar(
+                                isSortOptionExpanded = isSortOptionExpanded,
+                                onSortExpandToggle = { isSortOptionExpanded = !isSortOptionExpanded },
+                                selectedSortOption = state.sortOption,
+                                onSelectSortOption = { viewModel.onSortOptionSelected(it) }
+                            )
                         }
+
+
+                        val actividades = viewModel.getFilteredAndSortedActs(state)
+                        ActividadItem(navController, actividades)
                     }
                 }
             }
         }
     )
 }
-
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ActividadItem(
     navController: NavController,
@@ -134,12 +128,11 @@ fun ActividadItem(
         items(
             actividades,
             key = { actividad -> actividad.id },
-            ) { actividad ->
+        ) { actividad ->
             ActivityItem(navController, actividad)
         }
     }
 }
-
 
 @Composable
 fun SortByBar(
@@ -147,7 +140,7 @@ fun SortByBar(
     onSortExpandToggle: () -> Unit,
     selectedSortOption: SortOption,
     onSelectSortOption: (SortOption) -> Unit,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier.animateContentSize(
@@ -200,7 +193,7 @@ fun FilterCreditsBar(
     onToggleCreditValue: (Double) -> Unit,
     isCreditsExpanded: Boolean,
     onCreditsExpandToggle: () -> Unit,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier.animateContentSize(
@@ -229,14 +222,11 @@ fun FilterCreditsBar(
                     label = ({ Text(credit.toString()) })
                 )
             }
-
         }
-
     }
-
 }
 
-
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ActivityItem(
     navController: NavController,
@@ -279,7 +269,7 @@ fun ActivityItem(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = activity.fechaInicio,
+                    text = formatFecha(activity.fechaInicio),
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2
                 )
