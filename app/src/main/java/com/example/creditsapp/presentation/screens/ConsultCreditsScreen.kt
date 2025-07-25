@@ -32,8 +32,10 @@ import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.data.database.Activity
+import com.example.creditsapp.domain.model.CursoAlumno
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
+import com.example.creditsapp.presentation.viewmodel.ConsultCreditsUiState
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 import com.example.creditsapp.presentation.viewmodel.ConsultCreditsViewModel
 
@@ -43,7 +45,7 @@ fun ConsultCreditsScreen(
     viewModel: ConsultCreditsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
 
-    val userCompletedActivitiesUiState by viewModel.userCompletedActivities.collectAsState()
+    val uiState = viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -52,25 +54,34 @@ fun ConsultCreditsScreen(
                 navigateToProfile = { navController.navigate(Screen.Profile.name) })
         },
         content = { paddingValues ->
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                CreditsImage()
-                Spacer(modifier = Modifier.height(20.dp))
-                CreditsListTitle()
-                Spacer(modifier = Modifier.height(20.dp))
-                CreditsList(userCompletedActivitiesUiState.userActivitiesList)
+
+            when (val state = uiState.value) {
+                ConsultCreditsUiState.Error -> ErrorScreen()
+                ConsultCreditsUiState.Loading -> LoadingScreen()
+                is ConsultCreditsUiState.Success -> {
+                    val actividades = state.actividades
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                    ) {
+                        CreditsImage()
+                        Spacer(modifier = Modifier.height(20.dp))
+                        CreditsListTitle()
+                        Spacer(modifier = Modifier.height(20.dp))
+                        CreditsList(actividades)
+                    }
+                }
             }
         }
     )
 }
 
 @Composable
-fun CreditsList(activitiesForUser: List<Activity>) {
+fun CreditsList(activitiesForUser: List<CursoAlumno>) {
     Column {
         Card(
             colors = CardDefaults.cardColors(
@@ -98,13 +109,13 @@ fun CreditsList(activitiesForUser: List<Activity>) {
                 items(activitiesForUser) { activity ->
                     Row(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = activity.name,
+                            text = activity.nombre,
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f)
                         )
                         Text(
-                            text = activity.value.toString(),
+                            text = activity.creditos.toString(),
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f)
