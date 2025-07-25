@@ -56,7 +56,7 @@ object AppViewModelProvider {
 
         initializer {
             ConsultCreditsViewModel(
-                userActivitiesRepository = creditsApp().container.userActivitiesRepository,
+                alumnoActividadRepository = creditsApp().container.alumnoActividadRepository,
                 userPreferences = creditsApp().container.userPreferences
             )
         }
