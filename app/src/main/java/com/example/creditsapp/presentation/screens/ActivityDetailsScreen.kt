@@ -1,13 +1,18 @@
 package com.example.creditsapp.presentation.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -15,18 +20,20 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Description
+import androidx.compose.material.icons.rounded.Event
 import androidx.compose.material.icons.rounded.Groups
-import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -34,13 +41,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,114 +59,146 @@ import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.presentation.components.TopBar
-import com.example.creditsapp.presentation.utilities.formatDate
+import com.example.creditsapp.presentation.utilities.formatFecha
+import com.example.creditsapp.presentation.viewmodel.ActividadUiState
 import com.example.creditsapp.presentation.viewmodel.ActivityDetailsViewModel
-import com.example.creditsapp.presentation.viewmodel.UiEvent
+import com.example.creditsapp.presentation.viewmodel.AlumnoActividadState
+import com.example.creditsapp.presentation.viewmodel.AlumnoActividadUiMessageEvent
+import com.example.creditsapp.presentation.viewmodel.RegisterUiMessageEvent
+import com.example.creditsapp.presentation.viewmodel.RegisterValidationErrorType
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ActivityDetailsScreen(
     activityId: Int,
     navController: NavController,
     viewModel: ActivityDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val activityUiState by viewModel.activityUiState.collectAsState()
-    val userId by viewModel.id.collectAsState()
-    val message by viewModel.message.collectAsState()
+    val uiState = viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
 
-    val formatedDate = activityUiState.activity?.let { formatDate(it.date) }
+    val deleteFailedMsg = stringResource(R.string.delete_act_failed)
+    val deleteSuccessMsg = stringResource(R.string.delete_act_success)
+    val inscriptionFailedMsg = stringResource(R.string.add_act_failed)
+    val inscriptionSuccess = stringResource(R.string.add_act_success)
 
-
-    /*
-    Launched effect for a secondary event, it defines the message that the UI will display
-    when the user adds or deletes an activity. In this case, the viewmodel passes an state
-    from an enum class, and based of this state, the launched effect assigns the correct message.
-    */
-    LaunchedEffect(message) {
-        message?.let { msg ->
-            snackbarHostState.showSnackbar(
-                message = when (msg)  {
-                    UiEvent.AddSuccess -> context.getString(R.string.added_activity)
-                    UiEvent.AddError -> context.getString(R.string.add_error)
-                    UiEvent.DeleteSuccess -> context.getString(R.string.deleted_activity)
-                    UiEvent.DeleteError -> context.getString(R.string.delete_error)
-                },
-                duration = SnackbarDuration.Short
-            )
-            viewModel.clearMessage()
+    LaunchedEffect(Unit) {
+        viewModel.snackbarMessage.collect { event ->
+            val text = when (event) {
+                AlumnoActividadUiMessageEvent.DeleteFailed -> deleteFailedMsg
+                AlumnoActividadUiMessageEvent.DeleteSuccess -> deleteSuccessMsg
+                AlumnoActividadUiMessageEvent.InscriptionFailed -> inscriptionFailedMsg
+                AlumnoActividadUiMessageEvent.InscriptionSuccess -> inscriptionSuccess
+            }
+            snackbarHostState.showSnackbar(text)
         }
     }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+            )
+        },
         topBar = { TopBar(R.string.activity, navigateBack = { navController.popBackStack() }) },
+        floatingActionButton = {
+            when (val state = uiState.value) {
+                is ActividadUiState.Success -> {
+                    val actState = state.alumnoActividadState
+                    if (actState == AlumnoActividadState.NoInscrito) {
+                        FloatingButton (Icons.Rounded.Add) { viewModel.inscribirAlumno() }
+                    } else {
+                        FloatingButton(Icons.Rounded.Delete) { viewModel.eliminarActividad() }
+                    }
+                }
+                else -> {}
+            }
+        },
         content = { paddingValues ->
 
             Column(modifier = Modifier.padding(paddingValues)) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                        ActivityImage(R.drawable.activity)
-                        Column(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxSize(),
-                            horizontalAlignment = Alignment.Start,
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
 
-                            activityUiState.activity?.let {
-                                Text(
-                                    text = it.name,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                            }
+                when (val state = uiState.value) {
+                    ActividadUiState.Error -> ErrorScreen()
+                    ActividadUiState.Loading -> LoadingScreen()
+                    is ActividadUiState.Success -> {
+                        val actividad = state.actividad
 
-                            if (activityUiState.userActivityState?.isMine == true) {
-                                activityUiState.userActivityState?.let { ActivityStatusBadge(it.isCompleted) }
-                            }
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                                ActivityImage(R.drawable.activity)
+                                Column(
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .fillMaxSize(),
+                                    horizontalAlignment = Alignment.Start,
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    val actState = state.alumnoActividadState
 
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                                    val (badgeText, badgeColor) = when (actState) {
+                                        AlumnoActividadState.Inscrito -> "Inscrito" to Color(
+                                            0xFF4CAF50
+                                        ) // verde
+                                        AlumnoActividadState.EnCurso -> "En curso" to Color(
+                                            0xFF2196F3
+                                        )// azul
+                                        AlumnoActividadState.Completado -> "Completado" to Color(
+                                            0xFF9C27B0
+                                        ) // morado
+                                        AlumnoActividadState.Acreditado -> "Acreditado" to Color(
+                                            0xFF4CAF50
+                                        ) // verde
+                                        AlumnoActividadState.NoAcreditado -> "No acreditado" to Color(
+                                            0xFFF44336
+                                        ) // rojo
+                                        AlumnoActividadState.NoInscrito -> "No inscrito" to Color.Gray
+                                        is AlumnoActividadState.Desconocido -> "Desconocido" to Color.DarkGray
+                                    }
 
-                            activityUiState.activity?.let {
-                                if (formatedDate != null) {
-                                    ActivityDetail(
-                                        icon = Icons.Rounded.CalendarMonth,
-                                        detailText = formatedDate,
-                                        secondDetail = activityUiState.activity!!.hour
-                                    )
+                                    if (actividad != null) {
+                                        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                            Text(
+                                                text = actividad.nombre,
+                                                style = MaterialTheme.typography.titleMedium
+                                            )
+                                            ActividadStatusBadge(
+                                                text = badgeText,
+                                                color = badgeColor
+                                            )
+                                        }
+                                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                                        ActivityDetail(
+                                            icon = Icons.Rounded.Description,
+                                            detailText = actividad.descripcion,
+                                        )
+                                        ActivityDetail(
+                                            icon = Icons.Rounded.Event,
+                                            detailText = formatFecha(actividad.fechaInicio) + " a " + formatFecha(
+                                                actividad.fechaFin
+                                            ),
+                                            secondDetail = actividad.horaInicio + " - " + actividad.horaFin
+                                        )
+                                        ActivityDetail(
+                                            icon = Icons.Rounded.Star,
+                                            detailText = actividad.creditos.toString() + " crédito/s",
+                                        )
+                                        ActivityDetail(
+                                            icon = Icons.Rounded.Groups,
+                                            detailText = actividad.capacidad.toString() + " alumnos",
+                                        )
+                                        DetailList(actividad.carreraNombres, "Carreras")
+
+                                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                                    }
                                 }
                             }
-                            activityUiState.activity?.let {
-                                ActivityDetail(
-                                    icon = Icons.Rounded.LocationOn,
-                                    detailText = it.place
-                                )
-                            }
-                            ActivityDetail(
-                                icon = Icons.Rounded.Groups,
-                                detailText = activityUiState.activity?.spots.toString() + " alumnos"
-                            )
-                            ActivityDetail(
-                                icon = Icons.Rounded.Add,
-                                detailText = activityUiState.activity?.value.toString() + " créditos"
-                            )
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                         }
                     }
-                    /* If the user doesn't have the activity in their activities, then the button
-                    * will change. It will have a different option in each case.
-                    * Sign Up or Delete. */
-                    if (activityUiState.userActivityState?.isMine == false) {
-                        SignUpFloatingButton { viewModel.insertActivityUser() }
-                    } else {
-                        DeleteActivityButton(onClick = {
-                            viewModel.deleteActivityUser()
-                        })
-                    }
-
-                    SnackbarHost(hostState = snackbarHostState)
                 }
             }
         }
@@ -165,32 +206,53 @@ fun ActivityDetailsScreen(
 }
 
 @Composable
-fun DeleteActivityButton(onClick: () -> Unit) {
-    Row(
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.Bottom,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        FloatingActionButton(
-            onClick = { onClick() },
-            modifier = Modifier.padding(16.dp)
+fun DetailList(
+    carreraNombres: List<String>,
+    title: String = "Carreras"
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { isExpanded = !isExpanded },
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Rounded.Delete, null)
+            Icon(
+                imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                contentDescription = null,
+                modifier = Modifier.size(30.dp),
+                tint = MaterialTheme.colorScheme.primaryContainer
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelLarge
+            )
         }
 
+        AnimatedVisibility(visible = isExpanded) {
+            Column(
+                modifier = Modifier.padding(start = 16.dp)
+            ) {
+                carreraNombres.forEach { nombre ->
+                    Text(
+                        text = "• $nombre",
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+            }
+        }
     }
 }
 
 @Composable
-fun ActivityStatusBadge(status: Boolean) {
-    val bgColor = when (status) {
-        true -> Color(0xFF28A745)
-        false -> Color(0xFFFFC107)
-    }
-
+fun ActividadStatusBadge(text: String, color: Color) {
     Box(
         modifier = Modifier
-            .background(bgColor, shape = RoundedCornerShape(15.dp))
+            .background(color, shape = RoundedCornerShape(15.dp))
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Row(
@@ -204,54 +266,28 @@ fun ActivityStatusBadge(status: Boolean) {
                 modifier = Modifier.size(16.dp)
             )
             Spacer(Modifier.width(8.dp))
-            if (status) {
-                Text(
-                    text = "Completado",
-                    color = Color.White,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            } else {
-                Text(
-                    text = "Pendiente",
-                    color = Color.White,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            Text(
+                text = text,
+                color = Color.White,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
-
 }
 
 @Composable
-fun SignUpFloatingButton(
-    onClickButton: () -> Unit
+fun FloatingButton(
+    icon: ImageVector,
+    onClickButton: () -> Unit,
 ) {
-    Row(
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.Bottom,
-        modifier = Modifier.fillMaxSize()
+    FloatingActionButton(
+        onClick = onClickButton,
     ) {
-        FloatingActionButton(
-            onClick = { onClickButton() },
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Icon(Icons.Rounded.Add, null)
-        }
+        Icon(icon, contentDescription = null)
     }
 }
 
-//@Composable
-//fun NotFoundActivityText() {
-//    Column (modifier = Modifier
-//        .fillMaxSize()
-//        .padding(16.dp)){
-//        Text(text = stringResource(R.string.not_found_activity),
-//            style = MaterialTheme.typography.displaySmall,
-//            textAlign = TextAlign.Center)
-//    }
-//}
 
 @Composable
 fun ActivityImage(image: Int) {
@@ -284,6 +320,7 @@ fun ActivityDetail(
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
                 )
             }
         }

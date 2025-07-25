@@ -5,6 +5,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.creditsapp.data.repository.ActividadesRepository
 import com.example.creditsapp.presentation.viewmodel.ActivitiesViewModel
 import com.example.creditsapp.presentation.viewmodel.ActivityDetailsViewModel
 import com.example.creditsapp.presentation.viewmodel.UserActivitiesViewModel
@@ -47,9 +48,9 @@ object AppViewModelProvider {
         initializer {
             ActivityDetailsViewModel(
                 this.createSavedStateHandle(),
-                activitiesRepository = creditsApp().container.activitiesRepository,
-                userActivitiesRepository = creditsApp().container.userActivitiesRepository,
-                userPreferences = creditsApp().container.userPreferences
+                actividadRepository = creditsApp().container.actividadesRepository,
+                userPreferences = creditsApp().container.userPreferences,
+                alumnoActividadRepository = creditsApp().container.alumnoActividadRepository
             )
         }
 

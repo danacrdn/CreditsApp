@@ -10,6 +10,7 @@ import com.example.creditsapp.domain.model.LoginRequest
 import com.example.creditsapp.domain.model.LoginResponse
 import com.example.creditsapp.domain.model.RegisterRequest
 import com.example.creditsapp.domain.model.RegisterResponse
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -69,7 +70,7 @@ interface BackendApiService {
     suspend fun deleteActividadAlumno(
         @Path("alumnoId") alumnoId: Int,
         @Path("actividadId") actividadId: Int,
-    )
+    ) : Response<Unit>
 
     // Carrera
     @GET("/api/Carrera/carreras")

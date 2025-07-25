@@ -9,7 +9,8 @@ data class AlumnoActividad (
     val actividadId: Int,
     val estadoAlumnoActividad: Int,
     val fechaRegistro: String,
-    val creditosObtenidos: Double
+    val creditosObtenidos: Double,
+    val genero: Int
 )
 
 @Serializable
@@ -17,7 +18,8 @@ data class Inscripcion (
     val alumnoId: Int,
     val actividadId: Int,
     val estadoAlumnoActividad: Int,
-    val fechaInscripcion: String
+    val fechaInscripcion: String,
+    val genero: Int
 )
 
 @Serializable

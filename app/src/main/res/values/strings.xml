@@ -64,4 +64,8 @@
     <string name="error_incorrect_password">La contraseña que ingresaste es incorrecta.</string>
     <string name="login_failed">El inicio de sesión ha fallado.</string>
     <string name="success_login">¡Inicio de sesión correcto!</string>
+    <string name="delete_act_failed">No se ha podido eliminar la actividad.</string>
+    <string name="delete_act_success">Actividad eliminada.</string>
+    <string name="add_act_failed">No se ha podido inscribir a la actividad.</string>
+    <string name="add_act_success">Inscripción exitosa.</string>
 </resources>

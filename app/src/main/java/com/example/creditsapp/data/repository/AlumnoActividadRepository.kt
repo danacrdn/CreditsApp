@@ -3,6 +3,7 @@ package com.example.creditsapp.data.repository
 import com.example.creditsapp.data.network.BackendApiService
 import com.example.creditsapp.domain.model.AlumnoActividad
 import com.example.creditsapp.domain.model.Inscripcion
+import retrofit2.Response
 
 interface AlumnoActividadRepository {
     suspend fun getAlumnoActividadById(alumnoId: Int, actividadId: Int): AlumnoActividad
@@ -14,7 +15,7 @@ interface AlumnoActividadRepository {
         alumnoActividad: AlumnoActividad
     )
 
-    suspend fun deleteActividadAlumno(alumnoId: Int, actividadId: Int)
+    suspend fun deleteActividadAlumno(alumnoId: Int, actividadId: Int) : Response<Unit>
 }
 
 class DefaultAlumnoActividadRepository(private val apiService: BackendApiService) :
@@ -34,7 +35,7 @@ class DefaultAlumnoActividadRepository(private val apiService: BackendApiService
         alumnoActividad: AlumnoActividad
     ) = apiService.updateAlumnoActividad(alumnoId, actividadId, alumnoActividad)
 
-    override suspend fun deleteActividadAlumno(alumnoId: Int, actividadId: Int) =
+    override suspend fun deleteActividadAlumno(alumnoId: Int, actividadId: Int) : Response<Unit> =
         apiService.deleteActividadAlumno(alumnoId, actividadId)
 
 }
