@@ -2,41 +2,52 @@ package com.example.creditsapp.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.creditsapp.data.repository.AlumnoActividadRepository
 import com.example.creditsapp.data.repository.UserPreferencesRepository
-import com.example.creditsapp.data.database.Activity
-import com.example.creditsapp.data.repository.UserActivitiesRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharingStarted
+import com.example.creditsapp.domain.model.CursoAlumno
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class UserActivitiesViewModel(
-    private val userActivitiesRepository: UserActivitiesRepository,
-    userPreferences: UserPreferencesRepository
+    private val alumnoActividadRepository: AlumnoActividadRepository,
+    private val userPreferences: UserPreferencesRepository
 ) : ViewModel() {
 
-    val id: StateFlow<Int?> = userPreferences.userId
+    private val _uiState = MutableStateFlow<UserActivitiesUiState>(UserActivitiesUiState.Loading)
+    val uiState: StateFlow<UserActivitiesUiState> = _uiState
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val userActivities: StateFlow<UserActivitiesUiState> = id
-        .filterNotNull()
-        .flatMapLatest { id ->
-            userActivitiesRepository.getActivitiesForUserStream(id)
-                .map { UserActivitiesUiState(it) }
+    private fun fetchActividades() {
+        viewModelScope.launch {
+            val alumnoId = userPreferences.userId.first()
+
+            if (alumnoId != null) {
+                runCatching { alumnoActividadRepository.getActividadesPorAlumno(alumnoId) }
+                    .fold(
+                        onSuccess = {
+                            _uiState.value = UserActivitiesUiState.Success(it)
+                        },
+                        onFailure = {
+                            _uiState.value = UserActivitiesUiState.Error
+                        }
+                    )
+            } else {
+                _uiState.value = UserActivitiesUiState.Error
+            }
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-            initialValue = UserActivitiesUiState()
-        )
-
-    companion object {
-        private const val TIMEOUT_MILLIS = 5_000L
+    }
+    init {
+        fetchActividades()
     }
 
 }
 
-data class UserActivitiesUiState(val userActivitiesList: List<Activity> = listOf())
+sealed interface UserActivitiesUiState {
+    data class Success(
+        val actividades: List<CursoAlumno>,
+    ) : UserActivitiesUiState
+
+    data object Error : UserActivitiesUiState
+    data object Loading : UserActivitiesUiState
+}

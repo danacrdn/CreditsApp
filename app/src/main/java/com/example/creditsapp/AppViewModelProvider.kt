@@ -38,8 +38,8 @@ object AppViewModelProvider {
         }
 
         initializer {
-            UserActivitiesViewModel(
-                userActivitiesRepository = creditsApp().container.userActivitiesRepository,
+            UserActivitiesViewModel (
+                alumnoActividadRepository = creditsApp().container.alumnoActividadRepository,
                 userPreferences = creditsApp().container.userPreferences
             )
         }

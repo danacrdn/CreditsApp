@@ -1,5 +1,7 @@
 package com.example.creditsapp.presentation.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -8,7 +10,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.creditsapp.presentation.screens.ActivitiesScreen
 import com.example.creditsapp.presentation.screens.ActivityDetailsScreen
-import com.example.creditsapp.presentation.screens.CompletedActivitiesScreen
 import com.example.creditsapp.presentation.screens.ConsultCreditsScreen
 import com.example.creditsapp.presentation.screens.DownloadDocumentsScreen
 import com.example.creditsapp.presentation.screens.HomeScreen
@@ -17,7 +18,9 @@ import com.example.creditsapp.presentation.screens.ProfileScreen
 import com.example.creditsapp.presentation.screens.PostsScreen
 import com.example.creditsapp.presentation.screens.RegisterScreen
 import com.example.creditsapp.presentation.screens.SplashScreen
+import com.example.creditsapp.presentation.screens.UserActivitiesScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CreditsAppNavigation() {
     val navController = rememberNavController()
@@ -53,7 +56,7 @@ fun CreditsAppNavigation() {
         }
 
         composable(Screen.CompletedActivities.name) {
-            CompletedActivitiesScreen(navController)
+            UserActivitiesScreen(navController)
         }
 
         composable(

@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -24,7 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -34,19 +31,20 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
-import com.example.creditsapp.data.database.Activity
+import com.example.creditsapp.domain.model.CursoAlumno
 import com.example.creditsapp.presentation.components.TopBar
+import com.example.creditsapp.presentation.viewmodel.UserActivitiesUiState
 import com.example.creditsapp.presentation.viewmodel.UserActivitiesViewModel
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 
 @Composable
-fun CompletedActivitiesScreen(
+fun UserActivitiesScreen(
     navController: NavController,
     viewModel: UserActivitiesViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
 
-    val userActivities by viewModel.userActivities.collectAsState()
+    val uiState = viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -56,17 +54,24 @@ fun CompletedActivitiesScreen(
         },
         content = { paddingValues ->
 
-            if (userActivities.userActivitiesList.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(stringResource(R.string.unavailable_activities))
-                }
-            } else {
-                Column(modifier = Modifier.padding(paddingValues)) {
-                    UserActivitiesList(userActivities.userActivitiesList, navController)
+            when(val state = uiState.value){
+                UserActivitiesUiState.Error -> ErrorScreen()
+                UserActivitiesUiState.Loading -> LoadingScreen()
+                is UserActivitiesUiState.Success -> {
+                    val actividades = state.actividades
+                    if (actividades.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(stringResource(R.string.unavailable_activities))
+                        }
+                    } else {
+                        Column(modifier = Modifier.padding(paddingValues)) {
+                            UserActivitiesList(actividades, navController)
+                        }
+                    }
                 }
             }
         }
@@ -74,7 +79,7 @@ fun CompletedActivitiesScreen(
 }
 
 @Composable
-fun UserActivitiesList(userActivitiesList: List<Activity>, navController: NavController) {
+fun UserActivitiesList(userActivitiesList: List<CursoAlumno>, navController: NavController) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -95,13 +100,13 @@ fun UserActivitiesList(userActivitiesList: List<Activity>, navController: NavCon
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = activity.name,
+                        text = activity.nombre,
                         style = MaterialTheme.typography.labelLarge,
                         maxLines = 3,
                         modifier = Modifier.weight(1f)
                     )
                     IconButton(
-                        onClick = { navController.navigate("activity_details/${activity.id}") },
+                        onClick = { navController.navigate("activity_details/${activity.actividadId}") },
                         modifier = Modifier.size(50.dp)
                     ) {
                         Icon(
