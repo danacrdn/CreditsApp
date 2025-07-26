@@ -5,6 +5,7 @@ import com.example.creditsapp.domain.model.Alumno
 import com.example.creditsapp.domain.model.AlumnoActividad
 import com.example.creditsapp.domain.model.AlumnoUpdate
 import com.example.creditsapp.domain.model.Carrera
+import com.example.creditsapp.domain.model.CursoAlumno
 import com.example.creditsapp.domain.model.Inscripcion
 import com.example.creditsapp.domain.model.LoginRequest
 import com.example.creditsapp.domain.model.LoginResponse
@@ -52,7 +53,7 @@ interface BackendApiService {
     suspend fun getActividadesPorAlumno(
         @Path("alumnoId") alumnoId: Int,
         @Query("estado") estado: Int? = null
-    ): List<AlumnoActividad>
+    ): List<CursoAlumno>
 
     @POST("/api/AlumnoActividad")
     suspend fun createAlumnoActividad(

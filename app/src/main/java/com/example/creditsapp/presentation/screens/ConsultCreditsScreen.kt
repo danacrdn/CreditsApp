@@ -19,7 +19,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -31,18 +30,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
-import com.example.creditsapp.data.database.Activity
 import com.example.creditsapp.domain.model.CursoAlumno
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
-import com.example.creditsapp.presentation.viewmodel.ConsultCreditsUiState
+import com.example.creditsapp.presentation.viewmodel.ActivitiesHistorialUiState
+import com.example.creditsapp.presentation.viewmodel.ActivitiesHistorialViewModel
 import com.example.creditsapp.ui.theme.CreditsAppTheme
-import com.example.creditsapp.presentation.viewmodel.ConsultCreditsViewModel
 
 @Composable
 fun ConsultCreditsScreen(
     navController: NavController,
-    viewModel: ConsultCreditsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: ActivitiesHistorialViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
 
     val uiState = viewModel.uiState.collectAsState()
@@ -56,9 +54,9 @@ fun ConsultCreditsScreen(
         content = { paddingValues ->
 
             when (val state = uiState.value) {
-                ConsultCreditsUiState.Error -> ErrorScreen()
-                ConsultCreditsUiState.Loading -> LoadingScreen()
-                is ConsultCreditsUiState.Success -> {
+                ActivitiesHistorialUiState.Error -> ErrorScreen()
+                ActivitiesHistorialUiState.Loading -> LoadingScreen()
+                is ActivitiesHistorialUiState.Success -> {
                     val actividades = state.actividades
 
                     Column(
