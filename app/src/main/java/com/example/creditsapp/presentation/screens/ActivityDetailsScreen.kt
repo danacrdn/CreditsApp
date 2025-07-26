@@ -58,14 +58,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
+import com.example.creditsapp.presentation.components.ErrorScreen
+import com.example.creditsapp.presentation.components.LoadingScreen
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.utilities.formatFecha
 import com.example.creditsapp.presentation.viewmodel.ActividadUiState
 import com.example.creditsapp.presentation.viewmodel.ActivityDetailsViewModel
 import com.example.creditsapp.presentation.viewmodel.AlumnoActividadState
 import com.example.creditsapp.presentation.viewmodel.AlumnoActividadUiMessageEvent
-import com.example.creditsapp.presentation.viewmodel.RegisterUiMessageEvent
-import com.example.creditsapp.presentation.viewmodel.RegisterValidationErrorType
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 

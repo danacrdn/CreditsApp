@@ -26,10 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -46,10 +43,8 @@ import com.example.creditsapp.presentation.navigation.Screen
 import com.example.creditsapp.presentation.viewmodel.LoginFormEvent
 import com.example.creditsapp.presentation.viewmodel.LoginUiMessageEvent
 import com.example.creditsapp.presentation.viewmodel.LoginValidationErrorType
-import com.example.creditsapp.ui.theme.CreditsAppTheme
 import com.example.creditsapp.presentation.viewmodel.LoginViewModel
-import com.example.creditsapp.presentation.viewmodel.RegisterUiMessageEvent
-import com.example.creditsapp.presentation.viewmodel.RegisterValidationErrorType
+import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 @Composable
 fun LoginScreen(

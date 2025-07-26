@@ -14,16 +14,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -35,17 +30,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.domain.model.Post
-import com.example.creditsapp.presentation.viewmodel.PostsUiState
+import com.example.creditsapp.presentation.components.ErrorScreen
+import com.example.creditsapp.presentation.components.LoadingScreen
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
+import com.example.creditsapp.presentation.viewmodel.PostsUiState
 import com.example.creditsapp.presentation.viewmodel.PostsViewModel
 
 @Composable
@@ -152,36 +147,3 @@ fun PostCard(
     }
 }
 
-@Composable
-fun LoadingScreen() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxSize()
-
-    ) {
-        CircularProgressIndicator(
-            modifier = Modifier.width(64.dp),
-            color = MaterialTheme.colorScheme.secondary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-        )
-    }
-}
-
-@Composable
-fun ErrorScreen() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxSize()
-
-    ) {
-        Text(stringResource(R.string.error))
-        Spacer(Modifier.height(10.dp))
-        Button(onClick = {}) {
-            Text(stringResource(R.string.retry))
-        }
-    }
-}

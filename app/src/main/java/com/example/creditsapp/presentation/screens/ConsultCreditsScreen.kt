@@ -31,6 +31,8 @@ import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.domain.model.CursoAlumno
+import com.example.creditsapp.presentation.components.ErrorScreen
+import com.example.creditsapp.presentation.components.LoadingScreen
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
 import com.example.creditsapp.presentation.viewmodel.ActivitiesHistorialUiState
