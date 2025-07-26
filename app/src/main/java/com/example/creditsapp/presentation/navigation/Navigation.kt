@@ -10,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.creditsapp.presentation.screens.ActivitiesScreen
 import com.example.creditsapp.presentation.screens.ActivityDetailsScreen
+import com.example.creditsapp.presentation.screens.AnnouncementsScreen
 import com.example.creditsapp.presentation.screens.ConsultCreditsScreen
 import com.example.creditsapp.presentation.screens.DownloadDocumentsScreen
 import com.example.creditsapp.presentation.screens.HomeScreen
@@ -77,6 +78,10 @@ fun CreditsAppNavigation() {
 
         composable(Screen.Posts.name) {
             PostsScreen(navController)
+        }
+
+        composable(Screen.Announcements.name) {
+            AnnouncementsScreen(navController)
         }
     }
 }

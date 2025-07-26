@@ -100,7 +100,7 @@ fun Suggestions(
         modifier = Modifier
             .width(325.dp)
             .height(100.dp)
-            .clickable { navController.navigate(Screen.Posts.name) },
+            .clickable { navController.navigate(Screen.Announcements.name) },
     ) {
         Row(
             modifier = Modifier
@@ -122,7 +122,7 @@ fun Suggestions(
                     .padding(8.dp)
             )
             Text(
-                text = stringResource(R.string.questions_and_suggestions),
+                text = stringResource(R.string.announcements),
                 style = MaterialTheme.typography.labelLarge
             )
         }

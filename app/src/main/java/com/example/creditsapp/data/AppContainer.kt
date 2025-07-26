@@ -11,12 +11,14 @@ import com.example.creditsapp.data.repository.ActivitiesRepository
 import com.example.creditsapp.data.repository.AlumnoActividadRepository
 import com.example.creditsapp.data.repository.AlumnosRepository
 import com.example.creditsapp.data.repository.AuthRepository
+import com.example.creditsapp.data.repository.AvisoRepository
 import com.example.creditsapp.data.repository.CarreraRepository
 import com.example.creditsapp.data.repository.DefaultActividadesRepository
 import com.example.creditsapp.data.repository.DefaultActivitiesRepository
 import com.example.creditsapp.data.repository.DefaultAlumnoActividadRepository
 import com.example.creditsapp.data.repository.DefaultAlumnosRepository
 import com.example.creditsapp.data.repository.DefaultAuthRepository
+import com.example.creditsapp.data.repository.DefaultAvisoRepository
 import com.example.creditsapp.data.repository.DefaultCarreraRepository
 import com.example.creditsapp.data.repository.DefaultUserActivitiesRepository
 import com.example.creditsapp.data.repository.DefaultUsersRepository
@@ -43,6 +45,7 @@ interface AppContainer {
     val alumnoActividadRepository: AlumnoActividadRepository
     val authRepository: AuthRepository
     val carreraRepository: CarreraRepository
+    val avisoRepository: AvisoRepository
 }
 
 class DefaultAppContainer (context: Context): AppContainer {
@@ -113,5 +116,9 @@ class DefaultAppContainer (context: Context): AppContainer {
 
     override val carreraRepository: CarreraRepository by lazy {
         DefaultCarreraRepository(backendRetrofitService)
+    }
+
+    override val avisoRepository: AvisoRepository by lazy {
+        DefaultAvisoRepository(backendRetrofitService)
     }
 }

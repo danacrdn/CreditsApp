@@ -4,6 +4,7 @@ import com.example.creditsapp.domain.model.Actividad
 import com.example.creditsapp.domain.model.Alumno
 import com.example.creditsapp.domain.model.AlumnoActividad
 import com.example.creditsapp.domain.model.AlumnoUpdate
+import com.example.creditsapp.domain.model.Aviso
 import com.example.creditsapp.domain.model.Carrera
 import com.example.creditsapp.domain.model.CursoAlumno
 import com.example.creditsapp.domain.model.Inscripcion
@@ -87,4 +88,7 @@ interface BackendApiService {
     suspend fun login(
         @Body loginRequest: LoginRequest
     ): LoginResponse
+
+    @GET("api/Aviso")
+    suspend fun getAvisos() : List<Aviso>
 }

@@ -105,21 +105,30 @@ fun CreditsList(activitiesForUser: List<CursoAlumno>) {
 
             }
 
-            LazyColumn {
-                items(activitiesForUser) { activity ->
-                    Row(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = activity.nombre,
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = activity.creditos.toString(),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f)
-                        )
+            if (activitiesForUser.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .padding(18.dp),
+                ) {
+                    Text(text = "Aún no tienes actividades acreditadas.",  textAlign = TextAlign.Center,)
+                }
+            } else {
+                LazyColumn {
+                    items(activitiesForUser) { activity ->
+                        Row(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = activity.nombre,
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = activity.creditos.toString(),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
             }

@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.creditsapp.presentation.viewmodel.ActivitiesHistorialViewModel
 import com.example.creditsapp.presentation.viewmodel.ActivitiesViewModel
 import com.example.creditsapp.presentation.viewmodel.ActivityDetailsViewModel
+import com.example.creditsapp.presentation.viewmodel.AnnouncementsViewModel
 import com.example.creditsapp.presentation.viewmodel.HomeViewModel
 import com.example.creditsapp.presentation.viewmodel.LoginViewModel
 import com.example.creditsapp.presentation.viewmodel.PostsViewModel
@@ -85,6 +86,12 @@ object AppViewModelProvider {
             RegisterViewModel(
                 carreraRepository = creditsApp().container.carreraRepository,
                 authRepository = creditsApp().container.authRepository
+            )
+        }
+
+        initializer {
+            AnnouncementsViewModel(
+                avisoRepository = creditsApp().container.avisoRepository
             )
         }
     }
