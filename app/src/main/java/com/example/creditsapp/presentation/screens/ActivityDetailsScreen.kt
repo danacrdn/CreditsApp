@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Class
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.Event
@@ -190,6 +191,16 @@ fun ActivityDetailsScreen(
                                         ActivityDetail(
                                             icon = Icons.Rounded.Groups,
                                             detailText = actividad.capacidad.toString() + " alumnos",
+                                        )
+                                        ActivityDetail(
+                                            icon = Icons.Rounded.Class,
+                                            detailText = when (actividad.tipoActividad) {
+                                                1 -> "Deportiva"
+                                                2 -> "Cultural"
+                                                3 -> "Tutoría"
+                                                4 -> "Curso MOOC"
+                                                else -> "Actividad sin categoría"
+                                            },
                                         )
                                         DetailList(actividad.carreraNombres, "Carreras")
 

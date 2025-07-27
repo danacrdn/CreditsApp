@@ -204,15 +204,12 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     ProfileOptionPassword(
                         title = stringResource(R.string.password),
+                        confirmTitle = stringResource(R.string.confirm_password),
                         isEditing = uiState.isEditing,
                         value = (if (uiState.isEditing) uiState.editableProfileData.currentPassword else "*****"),
+                        confirmValue = uiState.editableProfileData.newPassword,
+                        onConfirmValueChanged = { viewModel.onEvent(ProfileEditEvent.ConfirmPasswordChanged(it)) },
                         onValueChanged = { viewModel.onEvent(ProfileEditEvent.PasswordChanged(it)) }
-                    )
-                    ProfileOptionPassword(
-                        title = stringResource(R.string.confirm_password),
-                        isEditing = uiState.isEditing,
-                        value = (if (uiState.isEditing) uiState.editableProfileData.newPassword else "*****"),
-                        onValueChanged = { viewModel.onEvent(ProfileEditEvent.ConfirmPasswordChanged(it)) }
                     )
                 }
 
@@ -386,6 +383,9 @@ fun ProfileOptionPassword(
     value: String,
     isEditing: Boolean,
     onValueChanged: (String) -> Unit,
+    onConfirmValueChanged: (String) -> Unit,
+    confirmValue: String,
+    confirmTitle: String,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -398,18 +398,34 @@ fun ProfileOptionPassword(
             modifier = Modifier.weight(1f)
         )
         if (isEditing) {
-            OutlinedTextField(
-                value = value,
-                onValueChange = onValueChanged,
-                placeholder = { Text(text = title) },
-                shape = RoundedCornerShape(30.dp),
-                singleLine = true,
-                maxLines = 1,
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier =Modifier
                     .weight(1f)
-                    .padding(4.dp)
-            )
+            ){
+                OutlinedTextField(
+                    value = value,
+                    onValueChange = onValueChanged,
+                    placeholder = { Text(text = title) },
+                    shape = RoundedCornerShape(30.dp),
+                    singleLine = true,
+                    maxLines = 1,
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier
+                        .padding(4.dp)
+                )
+                OutlinedTextField(
+                    value = confirmValue,
+                    onValueChange = onConfirmValueChanged,
+                    placeholder = { Text(text = confirmTitle) },
+                    shape = RoundedCornerShape(30.dp),
+                    singleLine = true,
+                    maxLines = 1,
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier
+                        .padding(4.dp)
+                )
+            }
         } else {
             Text(
                 text = value,

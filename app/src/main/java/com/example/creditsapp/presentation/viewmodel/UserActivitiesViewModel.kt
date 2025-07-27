@@ -18,7 +18,7 @@ class UserActivitiesViewModel(
     private val _uiState = MutableStateFlow<UserActivitiesUiState>(UserActivitiesUiState.Loading)
     val uiState: StateFlow<UserActivitiesUiState> = _uiState
 
-    private fun fetchActividades() {
+     fun fetchActividades() {
         viewModelScope.launch {
             val alumnoId = userPreferences.userId.first()
 

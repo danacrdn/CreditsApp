@@ -6,6 +6,7 @@ import com.example.creditsapp.data.repository.ActividadesRepository
 import com.example.creditsapp.domain.model.Actividad
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.IOException
 
@@ -28,10 +29,10 @@ class ActivitiesViewModel(
     }
 
     fun getFilteredAndSortedActs(state: ActividadesUiState.Success): List<Actividad> {
-        val filtered = if (state.selectedCredits.isEmpty()) {
-            state.actividades
-        } else {
-            state.actividades.filter { actividad -> actividad.creditos in state.selectedCredits }
+        val filtered = state.actividades.filter { actividad ->
+            val creditosOk = state.selectedCredits.isEmpty() || actividad.creditos in state.selectedCredits
+            val tipoOk = state.selectedType == null || actividad.tipoActividad == state.selectedType
+            creditosOk && tipoOk
         }
 
         return when (state.sortOption) {
@@ -48,6 +49,15 @@ class ActivitiesViewModel(
         }
     }
 
+    fun onTypeFilter(type: Int) {
+        _uiState.update { state ->
+            if (state is ActividadesUiState.Success) {
+                state.copy(selectedType = type)
+            } else {
+                state
+            }
+        }
+    }
 
     fun onCreditToggle(credit: Double) {
         val currentState = _uiState.value
@@ -70,7 +80,8 @@ sealed interface ActividadesUiState {
     data class Success(
         val actividades: List<Actividad>,
         val sortOption: SortOption = SortOption.NONE,
-        val selectedCredits: Set<Double> = emptySet()
+        val selectedCredits: Set<Double> = emptySet(),
+        val selectedType: Int? = null
     ) : ActividadesUiState
 
     object Error : ActividadesUiState

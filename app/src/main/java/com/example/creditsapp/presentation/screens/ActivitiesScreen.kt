@@ -6,6 +6,9 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
@@ -67,6 +71,7 @@ fun ActivitiesScreen(
 
     var showCreditsOptions by remember { mutableStateOf(false) }
     var isSortOptionExpanded by remember { mutableStateOf(false) }
+    var showTypeOptions by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -89,16 +94,39 @@ fun ActivitiesScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
                                 .padding(vertical = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            FilterCreditsBar(
-                                selectedCredits = state.selectedCredits,
-                                onToggleCreditValue = { credit -> viewModel.onCreditToggle(credit) },
-                                isCreditsExpanded = showCreditsOptions,
-                                onCreditsExpandToggle = { showCreditsOptions = !showCreditsOptions },
+                            FilterCategoryBar(
+                                title = stringResource(R.string.credits),
+                                options = listOf(0.5, 1.0, 1.5, 2.0),
+                                selectedOptions = state.selectedCredits,
+                                onOptionSelected = { viewModel.onCreditToggle(it) },
+                                isExpanded = showCreditsOptions,
+                                onExpandToggle = { showCreditsOptions = !showCreditsOptions},
+                                optionLabel = { it.toString() }
                             )
+
+                            FilterCategoryBar(
+                                title = stringResource(R.string.type),
+                                options = listOf(1, 2, 3, 4),
+                                selectedOptions = setOfNotNull(state.selectedType),
+                                onOptionSelected = { viewModel.onTypeFilter(it) },
+                                isExpanded = showTypeOptions,
+                                onExpandToggle = { showTypeOptions = !showTypeOptions },
+                                optionLabel = { tipo ->
+                                    when (tipo) {
+                                        1 -> "Deportiva"
+                                        2 -> "Cultural"
+                                        3 -> "Tutorías"
+                                        4 -> "MOOC"
+                                        else -> "Otro"
+                                    }
+                                }
+                            )
+
                             SortByBar(
                                 isSortOptionExpanded = isSortOptionExpanded,
                                 onSortExpandToggle = { isSortOptionExpanded = !isSortOptionExpanded },
@@ -186,15 +214,17 @@ fun SortByBar(
 
 
 @Composable
-fun FilterCreditsBar(
-    selectedCredits: Set<Double>,
-    onToggleCreditValue: (Double) -> Unit,
-    isCreditsExpanded: Boolean,
-    onCreditsExpandToggle: () -> Unit,
-    modifier: Modifier = Modifier,
+fun <T> FilterCategoryBar(
+    title: String,
+    options: List<T>,
+    selectedOptions: Set<T>,
+    onOptionSelected: (T) -> Unit,
+    isExpanded: Boolean,
+    onExpandToggle: () -> Unit,
+    optionLabel: @Composable (T) -> String
 ) {
     Column(
-        modifier = modifier.animateContentSize(
+        modifier = Modifier.animateContentSize(
             animationSpec = spring(
                 dampingRatio = Spring.DampingRatioNoBouncy,
                 stiffness = Spring.StiffnessVeryLow
@@ -202,27 +232,30 @@ fun FilterCreditsBar(
         )
     ) {
         FilterChip(
-            selected = isCreditsExpanded,
-            onClick = onCreditsExpandToggle,
-            label = { Text(stringResource(R.string.credits)) }
+            selected = isExpanded,
+            onClick = onExpandToggle,
+            label = { Text(title) }
         )
         DropdownMenu(
-            expanded = isCreditsExpanded,
-            onDismissRequest = onCreditsExpandToggle,
+            expanded = isExpanded,
+            onDismissRequest = onExpandToggle,
             modifier = Modifier.padding(16.dp)
-
         ) {
-            listOf(0.5, 1.0, 1.5, 2.0).forEach { credit ->
-                val isSelected = selectedCredits.contains(credit)
+            options.forEach { option ->
+                val isSelected = selectedOptions.contains(option)
                 FilterChip(
                     selected = isSelected,
-                    onClick = { onToggleCreditValue(credit) },
-                    label = ({ Text(credit.toString()) })
+                    onClick = {
+                        onOptionSelected(option)
+                    },
+                    label = { Text(optionLabel(option)) }
                 )
             }
         }
     }
 }
+
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable

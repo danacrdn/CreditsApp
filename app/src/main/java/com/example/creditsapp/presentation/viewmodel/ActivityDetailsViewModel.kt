@@ -82,6 +82,7 @@ class ActivityDetailsViewModel(
                 println(nuevaInscripcion)
                 val response = alumnoActividadRepository.createAlumnoActividad(nuevaInscripcion)
                 println("Se ha inscrito correctamente $response")
+                fetchActividad()
                 _snackbarMessage.emit(AlumnoActividadUiMessageEvent.InscriptionSuccess)
             } catch (e: Exception) {
                 println("Fallo al inscribir $e")
@@ -100,6 +101,7 @@ class ActivityDetailsViewModel(
             }
             try {
                 alumnoActividadRepository.deleteActividadAlumno(alumnoId, activityId)
+                fetchActividad()
                 _snackbarMessage.emit(AlumnoActividadUiMessageEvent.DeleteSuccess)
 
             } catch (e: Exception) {

@@ -69,4 +69,6 @@
     <string name="add_act_failed">No se ha podido inscribir a la actividad.</string>
     <string name="add_act_success">Inscripción exitosa.</string>
     <string name="announcements">Avisos</string>
+    <string name="by_type">Por tipo</string>
+    <string name="type">Tipo de actividad</string>
 </resources>
