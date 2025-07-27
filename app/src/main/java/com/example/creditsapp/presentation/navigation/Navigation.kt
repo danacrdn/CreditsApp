@@ -1,5 +1,7 @@
 package com.example.creditsapp.presentation.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -8,15 +10,18 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.creditsapp.presentation.screens.ActivitiesScreen
 import com.example.creditsapp.presentation.screens.ActivityDetailsScreen
-import com.example.creditsapp.presentation.screens.CompletedActivitiesScreen
+import com.example.creditsapp.presentation.screens.AnnouncementsScreen
 import com.example.creditsapp.presentation.screens.ConsultCreditsScreen
 import com.example.creditsapp.presentation.screens.DownloadDocumentsScreen
 import com.example.creditsapp.presentation.screens.HomeScreen
 import com.example.creditsapp.presentation.screens.LoginScreen
 import com.example.creditsapp.presentation.screens.ProfileScreen
 import com.example.creditsapp.presentation.screens.PostsScreen
+import com.example.creditsapp.presentation.screens.RegisterScreen
 import com.example.creditsapp.presentation.screens.SplashScreen
+import com.example.creditsapp.presentation.screens.UserActivitiesScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CreditsAppNavigation() {
     val navController = rememberNavController()
@@ -35,6 +40,10 @@ fun CreditsAppNavigation() {
 
         }
 
+        composable(Screen.Register.name) {
+            RegisterScreen(navController = navController)
+        }
+
         composable(Screen.Home.name) {
             HomeScreen(navController)
         }
@@ -48,7 +57,7 @@ fun CreditsAppNavigation() {
         }
 
         composable(Screen.CompletedActivities.name) {
-            CompletedActivitiesScreen(navController)
+            UserActivitiesScreen(navController)
         }
 
         composable(
@@ -69,6 +78,10 @@ fun CreditsAppNavigation() {
 
         composable(Screen.Posts.name) {
             PostsScreen(navController)
+        }
+
+        composable(Screen.Announcements.name) {
+            AnnouncementsScreen(navController)
         }
     }
 }

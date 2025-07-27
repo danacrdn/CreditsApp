@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,13 +18,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -37,8 +40,11 @@ import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.presentation.navigation.Screen
-import com.example.creditsapp.ui.theme.CreditsAppTheme
+import com.example.creditsapp.presentation.viewmodel.LoginFormEvent
+import com.example.creditsapp.presentation.viewmodel.LoginUiMessageEvent
+import com.example.creditsapp.presentation.viewmodel.LoginValidationErrorType
 import com.example.creditsapp.presentation.viewmodel.LoginViewModel
+import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 @Composable
 fun LoginScreen(
@@ -46,60 +52,96 @@ fun LoginScreen(
     navController: NavController
 ) {
 
-    val email: String by viewModel.email.observeAsState("")
-    val password: String by viewModel.password.observeAsState("")
-    val loginEnabled: Boolean by viewModel.loginEnabled.observeAsState(false)
-    var errorMessage by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
+    val emptyUserMsg = stringResource(R.string.error_empty_username)
+    val emptyPassMsg = stringResource(R.string.error_incorrect_password)
+    val failedLoginMsg = stringResource(R.string.login_failed)
+    val successLoginMsg = stringResource(R.string.success_login)
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background)
-    ) {
-        LoginImage()
-        LoginText()
-        Spacer(modifier = Modifier.height(20.dp))
-        EmailTextField(email) { viewModel.onLoginChanged(email = it, password = password) }
-        Spacer(modifier = Modifier.height(10.dp))
-        PasswordTextField(password) { viewModel.onLoginChanged(email = email, password = it) }
-        Spacer(modifier = Modifier.height(20.dp))
-        LoginButton(
-            loginEnable = loginEnabled,
-            validateCredentials = {
-                viewModel.validateCredentials(email, password) { isValid ->
-                    if (isValid) {
-                        navController.navigate(Screen.Home.name) {
-                            popUpTo(Screen.Login.name) { inclusive = true }
-                        }
-                    } else {
-                        errorMessage = "Usuario o contraseña incorrectos"
-                    }
+    LaunchedEffect(Unit) {
+        viewModel.snackbarMessage.collect { event ->
+            val text = when (event) {
+                is LoginUiMessageEvent.ValidationError -> when (event.type) {
+                    LoginValidationErrorType.EMPTY_EMAIL -> emptyUserMsg
+                    LoginValidationErrorType.EMPTY_PASSWORD -> emptyPassMsg
                 }
+
+                LoginUiMessageEvent.LoginFailed -> failedLoginMsg
+                LoginUiMessageEvent.LoginSuccess -> successLoginMsg
             }
-        )
-
-        if (errorMessage.isNotEmpty()) {
-            Text(
-                errorMessage,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(16.dp)
-            )
+            snackbarHostState.showSnackbar(text)
         }
+    }
 
-        Spacer(modifier = Modifier.height(20.dp))
-        ForgotPasswordText()
-        Spacer(modifier = Modifier.height(50.dp))
-        SignupButton()
+    LaunchedEffect(uiState.loginSuccess) {
+        if (uiState.loginSuccess) {
+            navController.navigate(Screen.Home.name) {
+                popUpTo(Screen.Login.name) { inclusive = true }
+            }
+            viewModel.resetLoginSuccess()
+        }
+    }
+
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+
+            )
+        },
+        modifier = Modifier.fillMaxSize()
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = MaterialTheme.colorScheme.background)
+            ) {
+                LoginImage()
+                LoginText()
+                Spacer(modifier = Modifier.height(20.dp))
+                EmailTextField(uiState.username) {
+                    viewModel.onEvent(
+                        LoginFormEvent.UsernameChanged(
+                            it
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                PasswordTextField(uiState.password) {
+                    viewModel.onEvent(
+                        LoginFormEvent.PasswordChanged(
+                            it
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.height(20.dp))
+                LoginButton(
+                    validateCredentials = { viewModel.logIn() }
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                ForgotPasswordText()
+                Spacer(modifier = Modifier.height(50.dp))
+                SignupButton(navController)
+            }
+        }
     }
 }
 
 @Composable
-fun SignupButton(modifier: Modifier = Modifier) {
+fun SignupButton(navController: NavController, modifier: Modifier = Modifier) {
     OutlinedButton(
-        onClick = { },
+        onClick = { navController.navigate(Screen.Register.name) },
         modifier = modifier
             .width(325.dp)
             .height(50.dp),
@@ -125,12 +167,11 @@ fun ForgotPasswordText() {
 @Composable
 fun LoginButton(
     modifier: Modifier = Modifier,
-    loginEnable: Boolean,
     validateCredentials: () -> Unit
 ) {
     Button(
         onClick = { validateCredentials() },
-        enabled = loginEnable,
+        enabled = true,
         modifier = modifier
             .width(325.dp)
             .height(50.dp),
@@ -147,6 +188,7 @@ fun PasswordTextField(value: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
+        textStyle = MaterialTheme.typography.labelMedium,
         label = {
             Text(text = stringResource(R.string.password))
         },
@@ -164,6 +206,7 @@ fun EmailTextField(value: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
+        textStyle = MaterialTheme.typography.labelMedium,
         label = {
             Text(text = stringResource(R.string.email))
         },

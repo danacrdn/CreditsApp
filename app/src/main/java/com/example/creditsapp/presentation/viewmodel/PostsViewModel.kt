@@ -4,11 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.creditsapp.CreditsApp
 import com.example.creditsapp.data.repository.PostsRepository
 import com.example.creditsapp.domain.model.Post
 import kotlinx.coroutines.launch

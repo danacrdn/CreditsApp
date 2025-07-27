@@ -1,40 +1,55 @@
 package com.example.creditsapp.presentation.viewmodel
 
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.creditsapp.data.repository.AlumnosRepository
 import com.example.creditsapp.data.repository.UserPreferencesRepository
-import com.example.creditsapp.data.repository.UsersRepository
-import com.example.creditsapp.domain.model.UserTotalCredits
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import java.lang.Thread.State
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class HomeViewModel(
-    private val usersRepository: UsersRepository,
-    userPreferences: UserPreferencesRepository
+    private val alumnosRepository: AlumnosRepository,
+    private val userPreferences: UserPreferencesRepository
 ) : ViewModel() {
 
-    val id: StateFlow<Int?> = userPreferences.userId
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val homeUiState: StateFlow<HomeUiState> = id
-        .filterNotNull()
-        .flatMapLatest { id -> usersRepository.getUserAndCredits(id).map { HomeUiState(it) } }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-            initialValue = HomeUiState(UserTotalCredits("", 0))
-        )
+    init {
+        viewModelScope.launch {
+            userPreferences.id.collectLatest { userId ->
+                userId?.let {
+                    fetchUser(it)
+                }
+            }
+        }
+    }
 
-    companion object {
-        private const val TIMEOUT_MILLIS = 5_000L
+    private fun fetchUser(id: Int) {
+        viewModelScope.launch {
+            try {
+                val result = alumnosRepository.getAlumnoById(id)
+                println("Datos del alumno: $result")
+
+                _uiState.value = _uiState.value.copy(
+                    name = result.nombre,
+                    totalCredits = result.totalCreditos
+                )
+
+            } catch (e: Exception) {
+                println("Error al obtener datos: ${e.message}")
+            }
+        }
     }
 }
 
-data class HomeUiState(val userCredits: UserTotalCredits)
+data class HomeUiState(
+    val name: String = "",
+    val totalCredits: Double = 0.0,
+
+    val isLoading: Boolean = true,
+    val error: String? = null
+)

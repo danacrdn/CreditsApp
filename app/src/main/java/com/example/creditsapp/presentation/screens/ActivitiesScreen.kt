@@ -1,34 +1,38 @@
 package com.example.creditsapp.presentation.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForwardIos
 import androidx.compose.material.icons.rounded.School
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,25 +49,29 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
-import com.example.creditsapp.data.database.Activity
+import com.example.creditsapp.domain.model.Actividad
+import com.example.creditsapp.presentation.components.ErrorScreen
+import com.example.creditsapp.presentation.components.LoadingScreen
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
-import com.example.creditsapp.presentation.utilities.formatDate
+import com.example.creditsapp.presentation.utilities.formatFecha
+import com.example.creditsapp.presentation.viewmodel.ActividadesUiState
 import com.example.creditsapp.presentation.viewmodel.ActivitiesViewModel
 import com.example.creditsapp.presentation.viewmodel.SortOption
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ActivitiesScreen(
     navController: NavController,
     viewModel: ActivitiesViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val activities by viewModel.activities.collectAsState()
-    val selectedCredits by viewModel.selectedCredits.collectAsState()
-    val sortOption by viewModel.sortOption.collectAsState()
+
+    val uiState by viewModel.uiState.collectAsState()
 
     var showCreditsOptions by remember { mutableStateOf(false) }
     var isSortOptionExpanded by remember { mutableStateOf(false) }
-
+    var showTypeOptions by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -72,52 +80,84 @@ fun ActivitiesScreen(
                 navigateToProfile = { navController.navigate(Screen.Profile.name) })
         },
         content = { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp)
+            ) {
+                when (val state = uiState) {
+                    ActividadesUiState.Error -> ErrorScreen()
+                    ActividadesUiState.Loading -> LoadingScreen()
+                    is ActividadesUiState.Success -> {
 
-            if (activities.activitiesList.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(stringResource(R.string.unavailable_activities))
-                }
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(horizontal = 16.dp)
-                ) {
-                    Box(Modifier.fillMaxWidth()) {
-                        FilterCreditsBar(
-                            selectedCredits = selectedCredits,
-                            onToggleCreditValue = { credit -> viewModel.toggleCreditFilter(credit) },
-                            isCreditsExpanded = showCreditsOptions,
-                            onCreditsExpandToggle = { showCreditsOptions = !showCreditsOptions },
-                            modifier = Modifier.align(Alignment.TopStart)
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState())
+                                .padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            FilterCategoryBar(
+                                title = stringResource(R.string.credits),
+                                options = listOf(0.5, 1.0, 1.5, 2.0),
+                                selectedOptions = state.selectedCredits,
+                                onOptionSelected = { viewModel.onCreditToggle(it) },
+                                isExpanded = showCreditsOptions,
+                                onExpandToggle = { showCreditsOptions = !showCreditsOptions},
+                                optionLabel = { it.toString() }
+                            )
 
-                        Spacer(Modifier.width(8.dp))
+                            FilterCategoryBar(
+                                title = stringResource(R.string.type),
+                                options = listOf(1, 2, 3, 4),
+                                selectedOptions = setOfNotNull(state.selectedType),
+                                onOptionSelected = { viewModel.onTypeFilter(it) },
+                                isExpanded = showTypeOptions,
+                                onExpandToggle = { showTypeOptions = !showTypeOptions },
+                                optionLabel = { tipo ->
+                                    when (tipo) {
+                                        1 -> "Deportiva"
+                                        2 -> "Cultural"
+                                        3 -> "Tutorías"
+                                        4 -> "MOOC"
+                                        else -> "Otro"
+                                    }
+                                }
+                            )
 
-                        SortByBar(
-                            isSortOptionExpanded = isSortOptionExpanded,
-                            onSortExpandToggle = { isSortOptionExpanded = !isSortOptionExpanded },
-                            selectedSortOption = sortOption,
-                            onSelectSortOption = { viewModel.setSortOption(it) },
-                            modifier = Modifier.align(Alignment.TopEnd)
-                        )
-
-                    }
-                    LazyColumn {
-                        items(activities.activitiesList) { activity ->
-                            val formatedDate = formatDate(activity.date)
-                            ActivityItem(navController, activity, formatedDate)
+                            SortByBar(
+                                isSortOptionExpanded = isSortOptionExpanded,
+                                onSortExpandToggle = { isSortOptionExpanded = !isSortOptionExpanded },
+                                selectedSortOption = state.sortOption,
+                                onSelectSortOption = { viewModel.onSortOptionSelected(it) }
+                            )
                         }
+
+
+                        val actividades = viewModel.getFilteredAndSortedActs(state)
+                        ActividadItem(navController, actividades)
                     }
                 }
             }
         }
     )
+}
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun ActividadItem(
+    navController: NavController,
+    actividades: List<Actividad>
+) {
+    LazyColumn {
+        items(
+            actividades,
+            key = { actividad -> actividad.id },
+        ) { actividad ->
+            ActivityItem(navController, actividad)
+        }
+    }
 }
 
 @Composable
@@ -126,7 +166,7 @@ fun SortByBar(
     onSortExpandToggle: () -> Unit,
     selectedSortOption: SortOption,
     onSelectSortOption: (SortOption) -> Unit,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier.animateContentSize(
@@ -174,15 +214,17 @@ fun SortByBar(
 
 
 @Composable
-fun FilterCreditsBar(
-    selectedCredits: Set<Double>,
-    onToggleCreditValue: (Double) -> Unit,
-    isCreditsExpanded: Boolean,
-    onCreditsExpandToggle: () -> Unit,
-    modifier: Modifier,
+fun <T> FilterCategoryBar(
+    title: String,
+    options: List<T>,
+    selectedOptions: Set<T>,
+    onOptionSelected: (T) -> Unit,
+    isExpanded: Boolean,
+    onExpandToggle: () -> Unit,
+    optionLabel: @Composable (T) -> String
 ) {
     Column(
-        modifier = modifier.animateContentSize(
+        modifier = Modifier.animateContentSize(
             animationSpec = spring(
                 dampingRatio = Spring.DampingRatioNoBouncy,
                 stiffness = Spring.StiffnessVeryLow
@@ -190,37 +232,36 @@ fun FilterCreditsBar(
         )
     ) {
         FilterChip(
-            selected = isCreditsExpanded,
-            onClick = onCreditsExpandToggle,
-            label = { Text(stringResource(R.string.credits)) }
+            selected = isExpanded,
+            onClick = onExpandToggle,
+            label = { Text(title) }
         )
         DropdownMenu(
-            expanded = isCreditsExpanded,
-            onDismissRequest = onCreditsExpandToggle,
+            expanded = isExpanded,
+            onDismissRequest = onExpandToggle,
             modifier = Modifier.padding(16.dp)
-
         ) {
-            listOf(0.5, 1.0, 1.5, 2.0).forEach { credit ->
-                val isSelected = selectedCredits.contains(credit)
+            options.forEach { option ->
+                val isSelected = selectedOptions.contains(option)
                 FilterChip(
                     selected = isSelected,
-                    onClick = { onToggleCreditValue(credit) },
-                    label = ({ Text(credit.toString()) })
+                    onClick = {
+                        onOptionSelected(option)
+                    },
+                    label = { Text(optionLabel(option)) }
                 )
             }
-
         }
-
     }
-
 }
 
 
+
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ActivityItem(
     navController: NavController,
-    activity: Activity,
-    formatedDate: String
+    activity: Actividad,
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -253,13 +294,13 @@ fun ActivityItem(
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    text = activity.name,
+                    text = activity.nombre,
                     style = MaterialTheme.typography.labelLarge,
                     maxLines = 2
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = formatedDate,
+                    text = formatFecha(activity.fechaInicio),
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 2
                 )

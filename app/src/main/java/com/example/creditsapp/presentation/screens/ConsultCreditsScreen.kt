@@ -19,7 +19,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -31,19 +30,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
-import com.example.creditsapp.data.database.Activity
+import com.example.creditsapp.domain.model.CursoAlumno
+import com.example.creditsapp.presentation.components.ErrorScreen
+import com.example.creditsapp.presentation.components.LoadingScreen
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
+import com.example.creditsapp.presentation.viewmodel.ActivitiesHistorialUiState
+import com.example.creditsapp.presentation.viewmodel.ActivitiesHistorialViewModel
 import com.example.creditsapp.ui.theme.CreditsAppTheme
-import com.example.creditsapp.presentation.viewmodel.ConsultCreditsViewModel
 
 @Composable
 fun ConsultCreditsScreen(
     navController: NavController,
-    viewModel: ConsultCreditsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: ActivitiesHistorialViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
 
-    val userCompletedActivitiesUiState by viewModel.userCompletedActivities.collectAsState()
+    val uiState = viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -52,25 +54,34 @@ fun ConsultCreditsScreen(
                 navigateToProfile = { navController.navigate(Screen.Profile.name) })
         },
         content = { paddingValues ->
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                CreditsImage()
-                Spacer(modifier = Modifier.height(20.dp))
-                CreditsListTitle()
-                Spacer(modifier = Modifier.height(20.dp))
-                CreditsList(userCompletedActivitiesUiState.userActivitiesList)
+
+            when (val state = uiState.value) {
+                ActivitiesHistorialUiState.Error -> ErrorScreen()
+                ActivitiesHistorialUiState.Loading -> LoadingScreen()
+                is ActivitiesHistorialUiState.Success -> {
+                    val actividades = state.actividades
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                    ) {
+                        CreditsImage()
+                        Spacer(modifier = Modifier.height(20.dp))
+                        CreditsListTitle()
+                        Spacer(modifier = Modifier.height(20.dp))
+                        CreditsList(actividades)
+                    }
+                }
             }
         }
     )
 }
 
 @Composable
-fun CreditsList(activitiesForUser: List<Activity>) {
+fun CreditsList(activitiesForUser: List<CursoAlumno>) {
     Column {
         Card(
             colors = CardDefaults.cardColors(
@@ -94,21 +105,30 @@ fun CreditsList(activitiesForUser: List<Activity>) {
 
             }
 
-            LazyColumn {
-                items(activitiesForUser) { activity ->
-                    Row(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = activity.name,
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Text(
-                            text = activity.value.toString(),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.weight(1f)
-                        )
+            if (activitiesForUser.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .padding(18.dp),
+                ) {
+                    Text(text = "Aún no tienes actividades acreditadas.",  textAlign = TextAlign.Center,)
+                }
+            } else {
+                LazyColumn {
+                    items(activitiesForUser) { activity ->
+                        Row(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = activity.nombre,
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = activity.creditos.toString(),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
             }

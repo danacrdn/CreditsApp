@@ -10,6 +10,5 @@ class CreditsApp : Application() {
     override fun onCreate() {
         super.onCreate()
         container = DefaultAppContainer(this)
-        println("App onCreate - this: $this")
     }
 }

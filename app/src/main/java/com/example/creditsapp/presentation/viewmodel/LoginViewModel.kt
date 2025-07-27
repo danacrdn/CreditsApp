@@ -1,59 +1,110 @@
 package com.example.creditsapp.presentation.viewmodel
 
-import android.util.Patterns
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.creditsapp.data.repository.AuthRepository
 import com.example.creditsapp.data.repository.UserPreferencesRepository
-import com.example.creditsapp.data.repository.UsersRepository
-import kotlinx.coroutines.flow.SharingStarted
+import com.example.creditsapp.domain.model.LoginRequest
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
-    private val usersRepository: UsersRepository,
-    private val userPreferences: UserPreferencesRepository
+    private val userPreferences: UserPreferencesRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    val userId: StateFlow<Int?> = userPreferences.userId.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = null
-    )
+    private val _uiState = MutableStateFlow(LoginUiState())
+    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-    private val _email = MutableLiveData<String>()
-    val email: LiveData<String> = _email
+    private val _snackbarMessage = MutableSharedFlow<LoginUiMessageEvent>()
+    val snackbarMessage: SharedFlow<LoginUiMessageEvent> = _snackbarMessage
 
-    private val _password = MutableLiveData<String>()
-    val password: LiveData<String> = _password
-
-    private val _loginEnabled = MutableLiveData<Boolean>()
-    val loginEnabled: LiveData<Boolean> = _loginEnabled
-
-    fun onLoginChanged(email: String, password: String) {
-        _email.value = email
-        _password.value = password
-        _loginEnabled.value = enableLoginButton(email, password)
-
-    }
-    // Función de comprobación, devuelve true si ambos valores son válidos
-
-    private fun enableLoginButton(email: String, password: String) =
-        password.length >= 6 && Patterns.EMAIL_ADDRESS.matcher(email).matches()
-
-    fun validateCredentials(email: String, inputPassword: String, onResult: (Boolean) -> Unit) {
-        // obtener el usuario correspondiente por medio del email ingresado.
-        viewModelScope.launch {
-            val user = usersRepository.getUserByEmailStream(email).firstOrNull()
-            val isValid = user?.password == inputPassword
-
-            if (isValid) {
-                userPreferences.saveUserId(user!!.id)
-            }
-            onResult(isValid)
+    fun onEvent(event: LoginFormEvent) {
+        _uiState.value = when (event) {
+            is LoginFormEvent.UsernameChanged-> _uiState.value.copy(username = event.value)
+            is LoginFormEvent.PasswordChanged -> _uiState.value.copy(password = event.value)
         }
     }
+
+    fun logIn(){
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                loginError = null,
+                loginSuccess = false
+            )
+
+            val state = _uiState.value
+            when(val validation = validateForm(state)) {
+                is ValidationResult.Success -> {
+                    val loginRequest = LoginRequest(
+                        usuario = state.username,
+                        password = state.password
+                    )
+
+                    try {
+                        val result = authRepository.login(loginRequest)
+                        println("Inicio de sesión exitoso: $result")
+
+                        // save the user or alumno id
+                        userPreferences.saveUserId(result.alumnoId)
+
+                        _snackbarMessage.emit(LoginUiMessageEvent.LoginSuccess)
+
+                        _uiState.value = _uiState.value.copy(
+                            loginSuccess = true
+                        )
+
+                    } catch (e: Exception) {
+                        println("Error al iniciar sesión: ${e.message}")
+                        _snackbarMessage.emit(LoginUiMessageEvent.LoginFailed)
+                    }
+                }
+
+                is ValidationResult.Error -> {
+                    val errorType = validation.errorType
+                    _snackbarMessage.emit(LoginUiMessageEvent.ValidationError(errorType))
+                }
+            }
+        }
+    }
+
+    private fun validateForm(state: LoginUiState): ValidationResult<LoginValidationErrorType> {
+        return when {
+            state.username.isBlank() -> ValidationResult.Error(LoginValidationErrorType.EMPTY_EMAIL)
+            state.password.isBlank() -> ValidationResult.Error(LoginValidationErrorType.EMPTY_PASSWORD)
+            else -> ValidationResult.Success
+        }
+    }
+
+    fun resetLoginSuccess() {
+        _uiState.value = _uiState.value.copy(loginSuccess = false)
+    }
 }
+
+sealed class LoginUiMessageEvent {
+    data class ValidationError(val type: LoginValidationErrorType) : LoginUiMessageEvent()
+    object LoginSuccess : LoginUiMessageEvent()
+    object LoginFailed : LoginUiMessageEvent()
+}
+
+sealed class LoginFormEvent {
+    data class UsernameChanged(val value: String) : LoginFormEvent()
+    data class PasswordChanged(val value: String) : LoginFormEvent()
+}
+
+sealed class LoginValidationErrorType {
+    object EMPTY_EMAIL : LoginValidationErrorType()
+    object EMPTY_PASSWORD : LoginValidationErrorType()
+}
+
+data class LoginUiState(
+    val username: String = "",
+    val password: String = "",
+
+    val loginError: String? = null,
+    val loginSuccess: Boolean = false
+)
