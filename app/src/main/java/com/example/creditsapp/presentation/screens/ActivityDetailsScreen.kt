@@ -62,11 +62,14 @@ import com.example.creditsapp.R
 import com.example.creditsapp.presentation.components.ErrorScreen
 import com.example.creditsapp.presentation.components.LoadingScreen
 import com.example.creditsapp.presentation.components.TopBar
+import com.example.creditsapp.presentation.utilities.UiState
 import com.example.creditsapp.presentation.utilities.formatFecha
-import com.example.creditsapp.presentation.viewmodel.ActividadUiState
-import com.example.creditsapp.presentation.viewmodel.ActivityDetailsViewModel
-import com.example.creditsapp.presentation.viewmodel.AlumnoActividadState
-import com.example.creditsapp.presentation.viewmodel.AlumnoActividadUiMessageEvent
+import com.example.creditsapp.presentation.viewmodel.details.ActivityDetailsEffect
+import com.example.creditsapp.presentation.viewmodel.details.ActivityDetailsIntent
+import com.example.creditsapp.presentation.viewmodel.details.ActivityDetailsViewModel
+import com.example.creditsapp.presentation.viewmodel.details.AlumnoActividadAction
+import com.example.creditsapp.presentation.viewmodel.details.AlumnoActividadState
+import com.example.creditsapp.presentation.viewmodel.details.AlumnoActividadUiMessageEvent
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 
@@ -77,7 +80,7 @@ fun ActivityDetailsScreen(
     navController: NavController,
     viewModel: ActivityDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val uiState = viewModel.uiState.collectAsState()
+    val uiState = viewModel.uiState.collectAsState().value
     val snackbarHostState = remember { SnackbarHostState() }
 
     val deleteFailedMsg = stringResource(R.string.delete_act_failed)
@@ -86,14 +89,18 @@ fun ActivityDetailsScreen(
     val inscriptionSuccess = stringResource(R.string.add_act_success)
 
     LaunchedEffect(Unit) {
-        viewModel.snackbarMessage.collect { event ->
-            val text = when (event) {
-                AlumnoActividadUiMessageEvent.DeleteFailed -> deleteFailedMsg
-                AlumnoActividadUiMessageEvent.DeleteSuccess -> deleteSuccessMsg
-                AlumnoActividadUiMessageEvent.InscriptionFailed -> inscriptionFailedMsg
-                AlumnoActividadUiMessageEvent.InscriptionSuccess -> inscriptionSuccess
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is ActivityDetailsEffect.ShowSnackbar -> {
+                    val message = when (effect.message) {
+                        AlumnoActividadUiMessageEvent.DeleteFailed -> deleteFailedMsg
+                        AlumnoActividadUiMessageEvent.DeleteSuccess -> deleteSuccessMsg
+                        AlumnoActividadUiMessageEvent.InscriptionFailed -> inscriptionFailedMsg
+                        AlumnoActividadUiMessageEvent.InscriptionSuccess -> inscriptionSuccess
+                    }
+                    snackbarHostState.showSnackbar(message)
+                }
             }
-            snackbarHostState.showSnackbar(text)
         }
     }
 
@@ -107,15 +114,28 @@ fun ActivityDetailsScreen(
         },
         topBar = { TopBar(R.string.activity, navigateBack = { navController.popBackStack() }) },
         floatingActionButton = {
-            when (val state = uiState.value) {
-                is ActividadUiState.Success -> {
-                    val actState = state.alumnoActividadState
+            when (val dataState = uiState.dataState) {
+                is UiState.Success -> {
+                    val actState = dataState.data.alumnoActividadState
                     if (actState == AlumnoActividadState.NoInscrito) {
-                        FloatingButton (Icons.Rounded.Add) { viewModel.inscribirAlumno() }
+                        FloatingButton(Icons.Rounded.Add) {
+                            viewModel.onIntent(
+                                ActivityDetailsIntent.PerformAction(
+                                    AlumnoActividadAction.InscribirAlumno
+                                )
+                            )
+                        }
                     } else {
-                        FloatingButton(Icons.Rounded.Delete) { viewModel.eliminarActividad() }
+                        FloatingButton(Icons.Rounded.Delete) {
+                            viewModel.onIntent(
+                                ActivityDetailsIntent.PerformAction(
+                                    AlumnoActividadAction.EliminarActividad
+                                )
+                            )
+                        }
                     }
                 }
+
                 else -> {}
             }
         },
@@ -123,11 +143,11 @@ fun ActivityDetailsScreen(
 
             Column(modifier = Modifier.padding(paddingValues)) {
 
-                when (val state = uiState.value) {
-                    ActividadUiState.Error -> ErrorScreen()
-                    ActividadUiState.Loading -> LoadingScreen()
-                    is ActividadUiState.Success -> {
-                        val actividad = state.actividad
+                when (val state = uiState.dataState) {
+                    UiState.Error -> ErrorScreen()
+                    UiState.Loading -> LoadingScreen()
+                    is UiState.Success -> {
+                        val actividad = state.data.actividad
 
                         Box(modifier = Modifier.fillMaxSize()) {
                             Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -139,7 +159,7 @@ fun ActivityDetailsScreen(
                                     horizontalAlignment = Alignment.Start,
                                     verticalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
-                                    val actState = state.alumnoActividadState
+                                    val actState = state.data.alumnoActividadState
 
                                     val (badgeText, badgeColor) = when (actState) {
                                         AlumnoActividadState.Inscrito -> "Inscrito" to Color(

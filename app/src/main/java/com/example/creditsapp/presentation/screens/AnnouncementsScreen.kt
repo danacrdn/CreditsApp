@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,9 +33,9 @@ import com.example.creditsapp.presentation.components.ErrorScreen
 import com.example.creditsapp.presentation.components.LoadingScreen
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
+import com.example.creditsapp.presentation.utilities.UiState
 import com.example.creditsapp.presentation.utilities.formatFecha
-import com.example.creditsapp.presentation.viewmodel.AnnouncementsUiState
-import com.example.creditsapp.presentation.viewmodel.AnnouncementsViewModel
+import com.example.creditsapp.presentation.viewmodel.announcements.AnnouncementsViewModel
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -62,10 +61,10 @@ fun AnnouncementsScreen(
                     .padding(paddingValues)
             ) {
                 when (val state = uiState.value) {
-                    AnnouncementsUiState.Error -> ErrorScreen()
-                    AnnouncementsUiState.Loading -> LoadingScreen()
-                    is AnnouncementsUiState.Success -> {
-                        val avisos = state.avisos
+                    UiState.Error -> ErrorScreen()
+                    UiState.Loading -> LoadingScreen()
+                    is UiState.Success -> {
+                        val avisos = state.data
 
                         if (avisos.isEmpty()) {
                             Box(

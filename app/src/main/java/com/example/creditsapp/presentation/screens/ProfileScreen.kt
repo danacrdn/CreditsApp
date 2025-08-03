@@ -28,6 +28,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -53,8 +55,10 @@ import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
-import com.example.creditsapp.presentation.viewmodel.ProfileEditEvent
-import com.example.creditsapp.presentation.viewmodel.ProfileViewModel
+import com.example.creditsapp.presentation.viewmodel.profile.ProfileEffect
+import com.example.creditsapp.presentation.viewmodel.profile.ProfileIntent
+import com.example.creditsapp.presentation.viewmodel.profile.ProfileUiMessageEvent
+import com.example.creditsapp.presentation.viewmodel.profile.ProfileViewModel
 import com.example.creditsapp.presentation.viewmodel.SessionViewModel
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 
@@ -68,22 +72,50 @@ fun ProfileScreen(
     val isDarkMode by sessionViewModel.isDarkMode.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val fetchFailedMsg = stringResource(R.string.fetch_data_failed)
+    val updateFailedMsg = stringResource(R.string.update_failed)
+    val updateSuccessMsg = stringResource(R.string.update_success)
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is ProfileEffect.ShowSnackbar -> {
+                    val message = when (effect.message) {
+                        ProfileUiMessageEvent.FetchFailed -> fetchFailedMsg
+                        ProfileUiMessageEvent.UpdateFailed -> updateFailedMsg
+                        ProfileUiMessageEvent.UpdateSuccess -> updateSuccessMsg
+                    }
+                    snackbarHostState.showSnackbar(message)
+                }
+                else -> {}
+            }
+        }
+    }
+
     /* Launched effect that listens the flow of navigation from the viewmodel.
     When viewmodel emits true to navigateToLogin, then navigates to login screen.
     It cleans the stack from the last session.
     * */
-    LaunchedEffect(viewModel.navigateToLogin) {
-        viewModel.navigateToLogin.collect { navigate ->
-            if (navigate) {
-                navController.navigate(Screen.Login.name) {
-                    popUpTo(navController.graph.id) { inclusive = true }
-                    launchSingleTop = true
-                }
+    LaunchedEffect(uiState.navigateToLogin) {
+        if (uiState.navigateToLogin) {
+            navController.navigate(Screen.Login.name) {
+                popUpTo(navController.graph.id) { inclusive = true }
+                launchSingleTop = true
             }
         }
     }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+
+            )
+        },
         topBar = { TopBar(R.string.profile, navigateBack = { navController.popBackStack() }) },
         content = { paddingValues ->
             Column(
@@ -107,7 +139,7 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.weight(1f))
 
                         if (!uiState.isEditing) {
-                            IconButton(onClick = { viewModel.startEditing() }) {
+                            IconButton(onClick = { viewModel.onIntent(ProfileIntent.StartEditing) }) {
                                 Icon(
                                     imageVector = Icons.Rounded.Edit,
                                     contentDescription = null,
@@ -122,7 +154,7 @@ fun ProfileScreen(
                             title = stringResource(R.string.name),
                             isEditing = uiState.isEditing,
                             value = (if (uiState.isEditing) uiState.editableProfileData.nombre else it.nombre),
-                            onValueChanged = { viewModel.onEvent(ProfileEditEvent.NombreChanged(it))}
+                            onValueChanged = { viewModel.onIntent(ProfileIntent.NombreChanged(it)) }
                         )
                     }
                     uiState.profileData?.let {
@@ -130,7 +162,7 @@ fun ProfileScreen(
                             title = stringResource(R.string.last_name),
                             isEditing = uiState.isEditing,
                             value = (if (uiState.isEditing) uiState.editableProfileData.apellido else it.apellido),
-                            onValueChanged = { viewModel.onEvent(ProfileEditEvent.ApellidoChanged(it))}
+                            onValueChanged = { viewModel.onIntent(ProfileIntent.ApellidoChanged(it)) }
                         )
                     }
                     uiState.profileData?.let {
@@ -138,7 +170,7 @@ fun ProfileScreen(
                             title = stringResource(R.string.no_control),
                             isEditing = uiState.isEditing,
                             value = it.numeroControl,
-                            onValueChanged = { /* No se edita */}
+                            onValueChanged = { /* No se edita */ }
                         )
                     }
 
@@ -147,14 +179,14 @@ fun ProfileScreen(
                             title = stringResource(R.string.email),
                             isEditing = uiState.isEditing,
                             value = (if (uiState.isEditing) uiState.editableProfileData.correoElectronico else it.correoElectronico),
-                            onValueChanged = { viewModel.onEvent(ProfileEditEvent.EmailChanged(it)) }
+                            onValueChanged = { viewModel.onIntent(ProfileIntent.EmailChanged(it)) }
                         )
                     }
                     uiState.profileData?.let {
                         ProfileOption(
                             title = stringResource(R.string.semester),
                             isEditing = uiState.isEditing,
-                            value = "",
+                            value = (if(uiState.isEditing) uiState.editableProfileData.semestre.toString() else it.semestre.toString()) ,
                             onValueChanged = {  }
                         )
                     }
@@ -162,7 +194,8 @@ fun ProfileScreen(
                     val selectedCarrera = if (uiState.isEditing) {
                         uiState.editableProfileData.carrera
                     } else {
-                        uiState.carreras.find { it.nombre == uiState.profileData?.carreraNombre }
+                        val carreraId = uiState.profileData?.carreraId
+                        uiState.carreras.find { it.id == carreraId }
                     }
 
                     selectedCarrera?.let { carrera ->
@@ -172,7 +205,7 @@ fun ProfileScreen(
                             isEditing = uiState.isEditing,
                             selectedOption = carrera,
                             onOptionSelected = { selected ->
-                                viewModel.onEvent(ProfileEditEvent.CarreraChanged(selected))
+                                viewModel.onIntent(ProfileIntent.CarreraChanged(selected))
                             },
                             optionLabel = { it.nombre }
                         )
@@ -208,20 +241,26 @@ fun ProfileScreen(
                         isEditing = uiState.isEditing,
                         value = (if (uiState.isEditing) uiState.editableProfileData.currentPassword else "*****"),
                         confirmValue = uiState.editableProfileData.newPassword,
-                        onConfirmValueChanged = { viewModel.onEvent(ProfileEditEvent.ConfirmPasswordChanged(it)) },
-                        onValueChanged = { viewModel.onEvent(ProfileEditEvent.PasswordChanged(it)) }
+                        onConfirmValueChanged = {
+                            viewModel.onIntent(
+                                ProfileIntent.ConfirmPasswordChanged(
+                                    it
+                                )
+                            )
+                        },
+                        onValueChanged = { viewModel.onIntent(ProfileIntent.PasswordChanged(it)) }
                     )
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 if (!uiState.isEditing) {
-                    LogOutOption(onClick = { viewModel.logOut() })
+                    LogOutOption(onClick = { viewModel.onIntent(ProfileIntent.LogOut) })
                 } else {
                     Row {
-                        SaveButton { viewModel.saveNewData() }
+                        SaveButton { viewModel.onIntent(ProfileIntent.SaveData) }
                         Spacer(modifier = Modifier.width(16.dp))
-                        CancelButton { viewModel.cancelEditing() }
+                        CancelButton { viewModel.onIntent(ProfileIntent.CancelEditing) }
                     }
                 }
             }
@@ -400,9 +439,9 @@ fun ProfileOptionPassword(
         if (isEditing) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier =Modifier
+                modifier = Modifier
                     .weight(1f)
-            ){
+            ) {
                 OutlinedTextField(
                     value = value,
                     onValueChange = onValueChanged,

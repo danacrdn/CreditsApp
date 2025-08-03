@@ -46,10 +46,11 @@ import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.domain.model.Carrera
 import com.example.creditsapp.presentation.navigation.Screen
-import com.example.creditsapp.presentation.viewmodel.RegisterFormEvent
-import com.example.creditsapp.presentation.viewmodel.RegisterUiMessageEvent
-import com.example.creditsapp.presentation.viewmodel.RegisterValidationErrorType
-import com.example.creditsapp.presentation.viewmodel.RegisterViewModel
+import com.example.creditsapp.presentation.viewmodel.register.RegisterEffect
+import com.example.creditsapp.presentation.viewmodel.register.RegisterIntent
+import com.example.creditsapp.presentation.viewmodel.register.RegisterUiMessageEvent
+import com.example.creditsapp.presentation.viewmodel.register.RegisterValidationErrorType
+import com.example.creditsapp.presentation.viewmodel.register.RegisterViewModel
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 @Composable
@@ -70,25 +71,31 @@ fun RegisterScreen(
     val invalidPasswordMsg = stringResource(R.string.error_invalid_password)
     val mismatchPasswordMsg = stringResource(R.string.error_mismatch_password)
     val regSuccessMsg = stringResource(R.string.registration_success)
-    val regFailedMsg  = stringResource(R.string.registration_failed)
+    val regFailedMsg = stringResource(R.string.registration_failed)
 
     LaunchedEffect(Unit) {
-        viewModel.snackbarMessage.collect { event ->
-            val text = when (event) {
-                is RegisterUiMessageEvent.ValidationError -> when (event.type) {
-                    RegisterValidationErrorType.EMPTY_NAME -> emptyNameMsg
-                    RegisterValidationErrorType.EMPTY_EMAIL -> emptyEmailMsg
-                    RegisterValidationErrorType.EMPTY_NOCONTROL -> emptyNumControlMsg
-                    RegisterValidationErrorType.INVALID_EMAIL -> invalidEmailMsg
-                    RegisterValidationErrorType.INVALID_SEMESTER -> invalidSemesterMsg
-                    RegisterValidationErrorType.INVALID_CAREER -> invalidCareerMsg
-                    RegisterValidationErrorType.EMPTY_PASSWORD -> invalidPasswordMsg
-                    RegisterValidationErrorType.PASSWORD_MISMATCH -> mismatchPasswordMsg
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is RegisterEffect.ShowSnackbar -> {
+                    val message = when (val event = effect.message) {
+                        RegisterUiMessageEvent.RegistrationFailed -> regFailedMsg
+                        RegisterUiMessageEvent.RegistrationSuccess -> regSuccessMsg
+                        is RegisterUiMessageEvent.ValidationError -> when (event.type) {
+                            RegisterValidationErrorType.EMPTY_NAME -> emptyNameMsg
+                            RegisterValidationErrorType.EMPTY_EMAIL -> emptyEmailMsg
+                            RegisterValidationErrorType.EMPTY_NOCONTROL -> emptyNumControlMsg
+                            RegisterValidationErrorType.INVALID_EMAIL -> invalidEmailMsg
+                            RegisterValidationErrorType.INVALID_SEMESTER -> invalidSemesterMsg
+                            RegisterValidationErrorType.INVALID_CAREER -> invalidCareerMsg
+                            RegisterValidationErrorType.EMPTY_PASSWORD -> invalidPasswordMsg
+                            RegisterValidationErrorType.PASSWORD_MISMATCH -> mismatchPasswordMsg
+                        }
+                    }
+                    snackbarHostState.showSnackbar(message)
                 }
-                is RegisterUiMessageEvent.RegistrationSuccess -> regSuccessMsg
-                is RegisterUiMessageEvent.RegistrationFailed -> regFailedMsg
+
+                else -> {}
             }
-            snackbarHostState.showSnackbar(text)
         }
     }
 
@@ -119,46 +126,46 @@ fun RegisterScreen(
                 Spacer(modifier = Modifier.height(20.dp))
                 DataTextField(
                     value = uiState.nombre,
-                    onValueChange = { viewModel.onEvent(RegisterFormEvent.NombreChanged(it)) },
+                    onValueChange = { viewModel.onIntent(RegisterIntent.NombreChanged(it)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     labelText = stringResource(R.string.name)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 DataTextField(
                     value = uiState.apellido,
-                    onValueChange = { viewModel.onEvent(RegisterFormEvent.ApellidoChanged(it)) },
+                    onValueChange = { viewModel.onIntent(RegisterIntent.ApellidoChanged(it)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                     labelText = stringResource(R.string.last_name)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 DataTextField(
                     value = uiState.numeroControl,
-                    onValueChange = { viewModel.onEvent(RegisterFormEvent.NumeroControlChanged(it)) },
+                    onValueChange = { viewModel.onIntent(RegisterIntent.NumeroControlChanged(it)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     labelText = stringResource(R.string.no_control)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 DataTextField(
                     value = uiState.email,
-                    onValueChange = { viewModel.onEvent(RegisterFormEvent.EmailChanged(it)) },
+                    onValueChange = { viewModel.onIntent(RegisterIntent.EmailChanged(it)) },
                     KeyboardOptions(keyboardType = KeyboardType.Email),
                     stringResource(R.string.email)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 DropdownSemester(
                     selectedSemester = uiState.semestre,
-                    onSemesterSelected = { viewModel.onEvent(RegisterFormEvent.SemestreChanged(it)) }
+                    onSemesterSelected = { viewModel.onIntent(RegisterIntent.SemestreChanged(it)) }
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 DropdownCareers(
                     options = uiState.carreras,
                     selectedCareer = uiState.selectedCareer,
-                    onCareerSelected = { viewModel.onEvent(RegisterFormEvent.CareerSelected(it)) }
+                    onCareerSelected = { viewModel.onIntent(RegisterIntent.CareerSelected(it)) }
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 DataTextField(
                     value = uiState.password,
-                    onValueChange = { viewModel.onEvent(RegisterFormEvent.PasswordChanged(it)) },
+                    onValueChange = { viewModel.onIntent(RegisterIntent.PasswordChanged(it)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     labelText = stringResource(R.string.password),
                     visualTransformation = PasswordVisualTransformation()
@@ -166,13 +173,16 @@ fun RegisterScreen(
                 Spacer(modifier = Modifier.height(10.dp))
                 DataTextField(
                     value = uiState.confirmPassword,
-                    onValueChange = { viewModel.onEvent(RegisterFormEvent.ConfirmPasswordChanged(it)) },
+                    onValueChange = { viewModel.onIntent(RegisterIntent.ConfirmPasswordChanged(it)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     labelText = stringResource(R.string.confirm_password),
                     visualTransformation = PasswordVisualTransformation()
                 )
                 Spacer(modifier = Modifier.height(20.dp))
-                ConfirmSignUpButton(viewModel::signUpNewUser, uiState.isRegistering)
+                ConfirmSignUpButton(
+                    { viewModel.onIntent(RegisterIntent.Submit) },
+                    uiState.isRegistering
+                )
                 Spacer(modifier = Modifier.height(10.dp))
                 LoginBackButton(navController)
             }

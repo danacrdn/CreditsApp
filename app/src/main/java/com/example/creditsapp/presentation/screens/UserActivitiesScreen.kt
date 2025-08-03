@@ -21,7 +21,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,8 +35,8 @@ import com.example.creditsapp.domain.model.CursoAlumno
 import com.example.creditsapp.presentation.components.ErrorScreen
 import com.example.creditsapp.presentation.components.LoadingScreen
 import com.example.creditsapp.presentation.components.TopBar
-import com.example.creditsapp.presentation.viewmodel.UserActivitiesUiState
-import com.example.creditsapp.presentation.viewmodel.UserActivitiesViewModel
+import com.example.creditsapp.presentation.utilities.UiState
+import com.example.creditsapp.presentation.viewmodel.userActivities.UserActivitiesViewModel
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 
@@ -46,10 +45,6 @@ fun UserActivitiesScreen(
     navController: NavController,
     viewModel: UserActivitiesViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-
-    LaunchedEffect(Unit) {
-        viewModel.fetchActividades()
-    }
 
 
     val uiState = viewModel.uiState.collectAsState()
@@ -63,10 +58,10 @@ fun UserActivitiesScreen(
         content = { paddingValues ->
 
             when(val state = uiState.value){
-                UserActivitiesUiState.Error -> ErrorScreen()
-                UserActivitiesUiState.Loading -> LoadingScreen()
-                is UserActivitiesUiState.Success -> {
-                    val actividades = state.actividades
+                UiState.Error -> ErrorScreen()
+                UiState.Loading -> LoadingScreen()
+                is UiState.Success -> {
+                    val actividades = state.data
                     if (actividades.isEmpty()) {
                         Box(
                             modifier = Modifier

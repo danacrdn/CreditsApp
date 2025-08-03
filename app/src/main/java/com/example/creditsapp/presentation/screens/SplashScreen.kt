@@ -17,6 +17,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.presentation.navigation.Screen
+import com.example.creditsapp.presentation.viewmodel.NavigationEvent
 import com.example.creditsapp.presentation.viewmodel.SessionViewModel
 import kotlinx.coroutines.delay
 
@@ -26,17 +27,18 @@ fun SplashScreen(
     sessionViewModel: SessionViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
 
-    val userId by sessionViewModel.userId.collectAsState()
+    LaunchedEffect(Unit) {
+        sessionViewModel.handleSplashNavigation()
+    }
 
-    LaunchedEffect(userId) {
-        delay(1000)
-        if(userId != null) {
-            navController.navigate(Screen.Home.name){
-                popUpTo(Screen.Splash.name) { inclusive = true }
-            }
-        } else {
-            navController.navigate(Screen.Login.name){
-                popUpTo(Screen.Splash.name) { inclusive = true }
+    LaunchedEffect(Unit) {
+        sessionViewModel.navigationEvents.collect { event ->
+            when (event) {
+                is NavigationEvent.NavigateTo -> {
+                    navController.navigate(event.route) {
+                        popUpTo(event.popUpTo) { inclusive = event.inclusive }
+                    }
+                }
             }
         }
     }

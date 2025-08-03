@@ -6,8 +6,6 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.ScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -54,10 +52,10 @@ import com.example.creditsapp.presentation.components.ErrorScreen
 import com.example.creditsapp.presentation.components.LoadingScreen
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
+import com.example.creditsapp.presentation.utilities.UiState
 import com.example.creditsapp.presentation.utilities.formatFecha
-import com.example.creditsapp.presentation.viewmodel.ActividadesUiState
-import com.example.creditsapp.presentation.viewmodel.ActivitiesViewModel
-import com.example.creditsapp.presentation.viewmodel.SortOption
+import com.example.creditsapp.presentation.viewmodel.activities.ActivitiesViewModel
+import com.example.creditsapp.presentation.viewmodel.activities.SortOption
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -87,9 +85,9 @@ fun ActivitiesScreen(
                     .padding(horizontal = 16.dp)
             ) {
                 when (val state = uiState) {
-                    ActividadesUiState.Error -> ErrorScreen()
-                    ActividadesUiState.Loading -> LoadingScreen()
-                    is ActividadesUiState.Success -> {
+                    UiState.Error -> ErrorScreen()
+                    UiState.Loading -> LoadingScreen()
+                    is UiState.Success -> {
 
                         Row(
                             modifier = Modifier
@@ -102,7 +100,7 @@ fun ActivitiesScreen(
                             FilterCategoryBar(
                                 title = stringResource(R.string.credits),
                                 options = listOf(0.5, 1.0, 1.5, 2.0),
-                                selectedOptions = state.selectedCredits,
+                                selectedOptions = state.data.filterState.selectedCredits,
                                 onOptionSelected = { viewModel.onCreditToggle(it) },
                                 isExpanded = showCreditsOptions,
                                 onExpandToggle = { showCreditsOptions = !showCreditsOptions},
@@ -112,7 +110,7 @@ fun ActivitiesScreen(
                             FilterCategoryBar(
                                 title = stringResource(R.string.type),
                                 options = listOf(1, 2, 3, 4),
-                                selectedOptions = setOfNotNull(state.selectedType),
+                                selectedOptions = setOfNotNull(state.data.filterState.selectedType),
                                 onOptionSelected = { viewModel.onTypeFilter(it) },
                                 isExpanded = showTypeOptions,
                                 onExpandToggle = { showTypeOptions = !showTypeOptions },
@@ -130,13 +128,13 @@ fun ActivitiesScreen(
                             SortByBar(
                                 isSortOptionExpanded = isSortOptionExpanded,
                                 onSortExpandToggle = { isSortOptionExpanded = !isSortOptionExpanded },
-                                selectedSortOption = state.sortOption,
+                                selectedSortOption = state.data.filterState.sortOption,
                                 onSelectSortOption = { viewModel.onSortOptionSelected(it) }
                             )
                         }
 
 
-                        val actividades = viewModel.getFilteredAndSortedActs(state)
+                        val actividades = state.data.actividades
                         ActividadItem(navController, actividades)
                     }
                 }

@@ -5,17 +5,16 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.creditsapp.presentation.viewmodel.ActivitiesHistorialViewModel
-import com.example.creditsapp.presentation.viewmodel.ActivitiesViewModel
-import com.example.creditsapp.presentation.viewmodel.ActivityDetailsViewModel
-import com.example.creditsapp.presentation.viewmodel.AnnouncementsViewModel
-import com.example.creditsapp.presentation.viewmodel.HomeViewModel
-import com.example.creditsapp.presentation.viewmodel.LoginViewModel
-import com.example.creditsapp.presentation.viewmodel.PostsViewModel
-import com.example.creditsapp.presentation.viewmodel.ProfileViewModel
-import com.example.creditsapp.presentation.viewmodel.RegisterViewModel
+import com.example.creditsapp.presentation.viewmodel.historial.ActivitiesHistorialViewModel
+import com.example.creditsapp.presentation.viewmodel.activities.ActivitiesViewModel
+import com.example.creditsapp.presentation.viewmodel.details.ActivityDetailsViewModel
+import com.example.creditsapp.presentation.viewmodel.announcements.AnnouncementsViewModel
+import com.example.creditsapp.presentation.viewmodel.home.HomeViewModel
+import com.example.creditsapp.presentation.viewmodel.login.LoginViewModel
+import com.example.creditsapp.presentation.viewmodel.profile.ProfileViewModel
+import com.example.creditsapp.presentation.viewmodel.register.RegisterViewModel
 import com.example.creditsapp.presentation.viewmodel.SessionViewModel
-import com.example.creditsapp.presentation.viewmodel.UserActivitiesViewModel
+import com.example.creditsapp.presentation.viewmodel.userActivities.UserActivitiesViewModel
 
 
 object AppViewModelProvider {
@@ -73,12 +72,6 @@ object AppViewModelProvider {
             LoginViewModel(
                 userPreferences = creditsApp().container.userPreferences,
                 authRepository = creditsApp().container.authRepository
-            )
-        }
-
-        initializer {
-            PostsViewModel(
-                postsRepository = creditsApp().container.postsRepository
             )
         }
 

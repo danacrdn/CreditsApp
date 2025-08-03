@@ -40,10 +40,11 @@ import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
 import com.example.creditsapp.presentation.navigation.Screen
-import com.example.creditsapp.presentation.viewmodel.LoginFormEvent
-import com.example.creditsapp.presentation.viewmodel.LoginUiMessageEvent
-import com.example.creditsapp.presentation.viewmodel.LoginValidationErrorType
-import com.example.creditsapp.presentation.viewmodel.LoginViewModel
+import com.example.creditsapp.presentation.viewmodel.login.LoginEffect
+import com.example.creditsapp.presentation.viewmodel.login.LoginIntent
+import com.example.creditsapp.presentation.viewmodel.login.LoginUiMessageEvent
+import com.example.creditsapp.presentation.viewmodel.login.LoginValidationErrorType
+import com.example.creditsapp.presentation.viewmodel.login.LoginViewModel
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 @Composable
@@ -61,17 +62,21 @@ fun LoginScreen(
     val successLoginMsg = stringResource(R.string.success_login)
 
     LaunchedEffect(Unit) {
-        viewModel.snackbarMessage.collect { event ->
-            val text = when (event) {
-                is LoginUiMessageEvent.ValidationError -> when (event.type) {
-                    LoginValidationErrorType.EMPTY_EMAIL -> emptyUserMsg
-                    LoginValidationErrorType.EMPTY_PASSWORD -> emptyPassMsg
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                is LoginEffect.ShowSnackbar -> {
+                    val message = when (val event = effect.message) {
+                        is LoginUiMessageEvent.ValidationError -> when (event.type) {
+                            LoginValidationErrorType.EMPTY_EMAIL -> emptyUserMsg
+                            LoginValidationErrorType.EMPTY_PASSWORD -> emptyPassMsg
+                        }
+                        LoginUiMessageEvent.LoginFailed -> failedLoginMsg
+                        LoginUiMessageEvent.LoginSuccess -> successLoginMsg
+                    }
+                    snackbarHostState.showSnackbar(message)
                 }
-
-                LoginUiMessageEvent.LoginFailed -> failedLoginMsg
-                LoginUiMessageEvent.LoginSuccess -> successLoginMsg
+                else -> {}
             }
-            snackbarHostState.showSnackbar(text)
         }
     }
 
@@ -80,7 +85,6 @@ fun LoginScreen(
             navController.navigate(Screen.Home.name) {
                 popUpTo(Screen.Login.name) { inclusive = true }
             }
-            viewModel.resetLoginSuccess()
         }
     }
 
@@ -111,23 +115,15 @@ fun LoginScreen(
                 LoginText()
                 Spacer(modifier = Modifier.height(20.dp))
                 EmailTextField(uiState.username) {
-                    viewModel.onEvent(
-                        LoginFormEvent.UsernameChanged(
-                            it
-                        )
-                    )
+                    viewModel.onIntent(LoginIntent.UsernameChanged(it))
                 }
                 Spacer(modifier = Modifier.height(10.dp))
                 PasswordTextField(uiState.password) {
-                    viewModel.onEvent(
-                        LoginFormEvent.PasswordChanged(
-                            it
-                        )
-                    )
+                    viewModel.onIntent(LoginIntent.PasswordChanged(it))
                 }
                 Spacer(modifier = Modifier.height(20.dp))
                 LoginButton(
-                    validateCredentials = { viewModel.logIn() }
+                    validateCredentials = { viewModel.onIntent(LoginIntent.Submit) }
                 )
                 Spacer(modifier = Modifier.height(20.dp))
                 ForgotPasswordText()

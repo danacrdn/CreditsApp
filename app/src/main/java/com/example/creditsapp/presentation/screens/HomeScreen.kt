@@ -46,9 +46,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.creditsapp.AppViewModelProvider
 import com.example.creditsapp.R
+import com.example.creditsapp.presentation.components.ErrorScreen
+import com.example.creditsapp.presentation.components.LoadingScreen
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
-import com.example.creditsapp.presentation.viewmodel.HomeViewModel
+import com.example.creditsapp.presentation.utilities.UiState
+import com.example.creditsapp.presentation.viewmodel.home.HomeViewModel
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 @Composable
@@ -57,7 +60,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
 
-    val homeUiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -67,22 +70,27 @@ fun HomeScreen(
         },
         content = { paddingValues ->
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                StudentInfo(homeUiState.name)
-                Spacer(modifier = Modifier.height(20.dp))
-                CreditsCard(homeUiState.totalCredits.toString())
-                Spacer(modifier = Modifier.height(20.dp))
-                OptionsGrid(navController)
-                Spacer(modifier = Modifier.height(8.dp))
-                Suggestions(navController)
-
+            when (val state = uiState) {
+                UiState.Error -> ErrorScreen()
+                UiState.Loading -> LoadingScreen()
+                is UiState.Success -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        StudentInfo(state.data.nombre)
+                        Spacer(modifier = Modifier.height(20.dp))
+                        CreditsCard(state.data.totalCreditos.toString())
+                        Spacer(modifier = Modifier.height(20.dp))
+                        OptionsGrid(navController)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Suggestions(navController)
+                    }
+                }
             }
         }
     )

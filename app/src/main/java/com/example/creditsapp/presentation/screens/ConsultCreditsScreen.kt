@@ -35,8 +35,8 @@ import com.example.creditsapp.presentation.components.ErrorScreen
 import com.example.creditsapp.presentation.components.LoadingScreen
 import com.example.creditsapp.presentation.components.TopBar
 import com.example.creditsapp.presentation.navigation.Screen
-import com.example.creditsapp.presentation.viewmodel.ActivitiesHistorialUiState
-import com.example.creditsapp.presentation.viewmodel.ActivitiesHistorialViewModel
+import com.example.creditsapp.presentation.utilities.UiState
+import com.example.creditsapp.presentation.viewmodel.historial.ActivitiesHistorialViewModel
 import com.example.creditsapp.ui.theme.CreditsAppTheme
 
 @Composable
@@ -56,10 +56,10 @@ fun ConsultCreditsScreen(
         content = { paddingValues ->
 
             when (val state = uiState.value) {
-                ActivitiesHistorialUiState.Error -> ErrorScreen()
-                ActivitiesHistorialUiState.Loading -> LoadingScreen()
-                is ActivitiesHistorialUiState.Success -> {
-                    val actividades = state.actividades
+                UiState.Error -> ErrorScreen()
+                UiState.Loading -> LoadingScreen()
+                is UiState.Success -> {
+                    val actividades = state.data
 
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,

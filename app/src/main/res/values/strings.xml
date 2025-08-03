@@ -71,4 +71,8 @@
     <string name="announcements">Avisos</string>
     <string name="by_type">Por tipo</string>
     <string name="type">Tipo de actividad</string>
+    <string name="fetch_data_failed">Error al cargar datos del usuario.</string>
+    <string name="update_failed">Error al actualizar datos.</string>
+    <string name="update_success">Datos actualizados correctamente.</string>
+    <string name="fetch_careers_failed">Error al cargar las carreras.</string>
 </resources>

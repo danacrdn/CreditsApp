@@ -16,7 +16,6 @@ import com.example.creditsapp.presentation.screens.DownloadDocumentsScreen
 import com.example.creditsapp.presentation.screens.HomeScreen
 import com.example.creditsapp.presentation.screens.LoginScreen
 import com.example.creditsapp.presentation.screens.ProfileScreen
-import com.example.creditsapp.presentation.screens.PostsScreen
 import com.example.creditsapp.presentation.screens.RegisterScreen
 import com.example.creditsapp.presentation.screens.SplashScreen
 import com.example.creditsapp.presentation.screens.UserActivitiesScreen
@@ -76,9 +75,9 @@ fun CreditsAppNavigation() {
             ConsultCreditsScreen(navController)
         }
 
-        composable(Screen.Posts.name) {
-            PostsScreen(navController)
-        }
+//        composable(Screen.Posts.name) {
+//            PostsScreen(navController)
+//        }
 
         composable(Screen.Announcements.name) {
             AnnouncementsScreen(navController)
