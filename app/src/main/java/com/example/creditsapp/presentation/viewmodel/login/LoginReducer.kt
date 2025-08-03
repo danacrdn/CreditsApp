@@ -2,9 +2,12 @@ package com.example.creditsapp.presentation.viewmodel.login
 
 import com.example.creditsapp.domain.model.LoginRequest
 import com.example.creditsapp.presentation.utilities.ValidationResult
+import com.example.creditsapp.presentation.utilities.chainValidations
+import com.example.creditsapp.presentation.utilities.toValidationResult
 
 object LoginReducer {
 
+    // funciones pura
     fun reduce(state: LoginUiState, intent: LoginIntent): Pair<LoginUiState, LoginEffect?> {
         return when (intent) {
             is LoginIntent.UsernameChanged ->
@@ -19,6 +22,7 @@ object LoginReducer {
                         val request = state.toLoginRequest()
                         state.copy(isLoading = true) to LoginEffect.PerformLogin(request)
                     }
+
                     is ValidationResult.Error -> {
                         val errorType = validation.errorType
                         state.copy(error = errorType) to LoginEffect.ShowSnackbar(
@@ -33,12 +37,12 @@ object LoginReducer {
     }
 
     private fun validate(state: LoginUiState): ValidationResult<LoginValidationErrorType> =
-        when {
-            state.username.isBlank() -> ValidationResult.Error(LoginValidationErrorType.EMPTY_EMAIL)
-            state.password.isBlank() -> ValidationResult.Error(LoginValidationErrorType.EMPTY_PASSWORD)
-            else -> ValidationResult.Success
-        }
+        listOf(
+            { state.username.isNotBlank().toValidationResult(LoginValidationErrorType.EMPTY_EMAIL) },
+            { state.password.isNotBlank().toValidationResult(LoginValidationErrorType.EMPTY_PASSWORD) }
+        ).chainValidations()
 
-    private fun LoginUiState.toLoginRequest() = LoginRequest(usuario = username, password = password)
+    private fun LoginUiState.toLoginRequest() =
+        LoginRequest(usuario = username, password = password)
 }
 

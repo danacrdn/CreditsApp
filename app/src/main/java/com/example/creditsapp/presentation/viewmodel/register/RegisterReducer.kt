@@ -1,8 +1,12 @@
 package com.example.creditsapp.presentation.viewmodel.register
 
+import android.util.Patterns
 import com.example.creditsapp.domain.model.RegisterRequest
 import com.example.creditsapp.presentation.utilities.ValidationResult
+import com.example.creditsapp.presentation.utilities.chainValidations
+import com.example.creditsapp.presentation.utilities.toValidationResult
 
+// función pura
 object RegisterReducer {
     fun reduce(
         state: RegisterUiState,
@@ -56,35 +60,17 @@ object RegisterReducer {
         }
     }
 
-    private fun validate(state: RegisterUiState): ValidationResult<RegisterValidationErrorType> {
-        return when {
-            state.nombre.isBlank() || state.apellido.isBlank() ->
-                ValidationResult.Error(RegisterValidationErrorType.EMPTY_NAME)
-
-            state.numeroControl.isBlank() ->
-                ValidationResult.Error(RegisterValidationErrorType.EMPTY_NOCONTROL)
-
-            state.email.isBlank() ->
-                ValidationResult.Error(RegisterValidationErrorType.EMPTY_EMAIL)
-
-            !android.util.Patterns.EMAIL_ADDRESS.matcher(state.email).matches() ->
-                ValidationResult.Error(RegisterValidationErrorType.INVALID_EMAIL)
-
-            state.semestre == null || state.semestre <= 0 ->
-                ValidationResult.Error(RegisterValidationErrorType.INVALID_SEMESTER)
-
-            state.selectedCareer == null ->
-                ValidationResult.Error(RegisterValidationErrorType.INVALID_CAREER)
-
-            state.password.isBlank() || state.confirmPassword.isBlank() ->
-                ValidationResult.Error(RegisterValidationErrorType.EMPTY_PASSWORD)
-
-            state.password != state.confirmPassword ->
-                ValidationResult.Error(RegisterValidationErrorType.PASSWORD_MISMATCH)
-
-            else -> ValidationResult.Success
-        }
-    }
+    private fun validate(state: RegisterUiState): ValidationResult<RegisterValidationErrorType> =
+        listOf(
+            { (state.nombre.isNotBlank() && state.apellido.isNotBlank()).toValidationResult(RegisterValidationErrorType.EMPTY_NAME) },
+            { state.numeroControl.isNotBlank().toValidationResult(RegisterValidationErrorType.EMPTY_NOCONTROL) },
+            { state.email.isNotBlank().toValidationResult(RegisterValidationErrorType.EMPTY_EMAIL) },
+            { Patterns.EMAIL_ADDRESS.matcher(state.email).matches().toValidationResult(RegisterValidationErrorType.INVALID_EMAIL) },
+            { (state.semestre != null && state.semestre > 0).toValidationResult(RegisterValidationErrorType.INVALID_SEMESTER) },
+            { (state.selectedCareer != null).toValidationResult(RegisterValidationErrorType.INVALID_CAREER) },
+            { (state.password.isNotBlank() && state.confirmPassword.isNotBlank()).toValidationResult(RegisterValidationErrorType.EMPTY_PASSWORD) },
+            { (state.password == state.confirmPassword).toValidationResult(RegisterValidationErrorType.PASSWORD_MISMATCH) }
+        ).chainValidations()
 
     private fun RegisterUiState.toRegisterRequest(): RegisterRequest = RegisterRequest(
         email = email,

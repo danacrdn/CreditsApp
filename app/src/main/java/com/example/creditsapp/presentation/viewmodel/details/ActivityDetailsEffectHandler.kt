@@ -21,7 +21,6 @@ class ActivityDetailsEffectHandler(
     private val userPreferences: UserPreferencesRepository,
     private val viewModelScope: CoroutineScope,
     private val effect: MutableSharedFlow<ActivityDetailsEffect>,
-    private val state: MutableStateFlow<ActivityDetailsUiState>,
     private val activityId: Int
 ) {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -39,12 +38,7 @@ class ActivityDetailsEffectHandler(
                                 .toAlumnoActividadState()
                             ActividadUiData(actividad, estado)
                         }
-                        state.value = state.value.copy(
-                            dataState = result.fold(
-                                onSuccess = { UiState.Success(it) },
-                                onFailure = { UiState.Error }
-                            )
-                        )
+                        effect.emit(ActivityDetailsEffect.DataLoaded(result))
                     }
                 }
             }
@@ -52,16 +46,16 @@ class ActivityDetailsEffectHandler(
             is ActivityDetailsIntent.PerformAction -> {
                 viewModelScope.launch {
                     userPreferences.userId.filterNotNull().collect { id ->
-                        state.value = state.value.copy(isPerformingAction = true)
                         val message = when (intent.action) {
                             is AlumnoActividadAction.InscribirAlumno -> inscribir(id)
                             is AlumnoActividadAction.EliminarActividad -> eliminar(id)
                         }
-                        state.value = state.value.copy(isPerformingAction = false)
                         effect.emit(ActivityDetailsEffect.ShowSnackbar(message))
                     }
                 }
             }
+
+            is ActivityDetailsIntent.DataLoaded -> {}
         }
     }
 
@@ -92,7 +86,7 @@ class ActivityDetailsEffectHandler(
             onFailure = AlumnoActividadUiMessageEvent.DeleteFailed
         )
 
-
+    // función pura
     private fun AlumnoActividad?.toAlumnoActividadState(): AlumnoActividadState =
         when (this?.estadoAlumnoActividad) {
             1 -> AlumnoActividadState.Inscrito
@@ -103,7 +97,7 @@ class ActivityDetailsEffectHandler(
             null -> AlumnoActividadState.NoInscrito
             else -> AlumnoActividadState.Desconocido
         }
-
+    // función pura
     private suspend fun <T> runUiMessageAction(
         block: suspend () -> T,
         onSuccess: AlumnoActividadUiMessageEvent,

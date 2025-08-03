@@ -2,6 +2,7 @@ package com.example.creditsapp.presentation.viewmodel.historial
 
 import com.example.creditsapp.domain.model.CursoAlumno
 
+// funciones puras
 fun filtrarActividades(actividades: List<CursoAlumno>): List<CursoAlumno> =
     actividades.filter(ReglasActividad.debeEstarCompletada)
 

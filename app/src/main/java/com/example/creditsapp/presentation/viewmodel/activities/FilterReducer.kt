@@ -1,6 +1,7 @@
 package com.example.creditsapp.presentation.viewmodel.activities
 
 object FilterReducer {
+    // función pura
     fun reducer(state: FilterState, action: FilterAction): FilterState = when (action) {
         is FilterAction.SetSortOption -> state.copy(sortOption = action.option)
         is FilterAction.SetType -> state.copy(

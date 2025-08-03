@@ -75,10 +75,6 @@ fun CreditsAppNavigation() {
             ConsultCreditsScreen(navController)
         }
 
-//        composable(Screen.Posts.name) {
-//            PostsScreen(navController)
-//        }
-
         composable(Screen.Announcements.name) {
             AnnouncementsScreen(navController)
         }

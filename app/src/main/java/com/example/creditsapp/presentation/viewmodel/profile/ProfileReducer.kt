@@ -6,6 +6,8 @@ import com.example.creditsapp.domain.model.Carrera
 import com.example.creditsapp.domain.model.EditableProfileData
 
 object ProfileReducer {
+
+    // función pura
     fun reduce(state: ProfileUiState, intent: ProfileIntent) : Pair<ProfileUiState, ProfileEffect?> {
         return when (intent) {
             ProfileIntent.LoadData -> state to null

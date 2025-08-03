@@ -37,7 +37,6 @@ class ActivityDetailsViewModel(
         userPreferences,
         viewModelScope,
         _effect,
-        _uiState,
         activityId
     )
 

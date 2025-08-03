@@ -2,6 +2,7 @@ package com.example.creditsapp.presentation.viewmodel.activities
 
 import com.example.creditsapp.domain.model.Actividad
 
+// función pura
 fun List<Actividad>.applyFilter(filter: FilterState): List<Actividad> =
     this.filter { actividad ->
         (filter.selectedCredits.isEmpty() || actividad.creditos in filter.selectedCredits) &&

@@ -17,9 +17,11 @@ data class ActivityDetailsUiState(
 sealed class ActivityDetailsIntent {
     object LoadActivityDetails : ActivityDetailsIntent()
     data class PerformAction(val action: AlumnoActividadAction) : ActivityDetailsIntent()
+    data class DataLoaded(val result: Result<ActividadUiData>) : ActivityDetailsIntent()
 }
 
 sealed class ActivityDetailsEffect {
+    data class DataLoaded(val result: Result<ActividadUiData>) : ActivityDetailsEffect()
     data class ShowSnackbar(val message: AlumnoActividadUiMessageEvent) : ActivityDetailsEffect()
 }
 
