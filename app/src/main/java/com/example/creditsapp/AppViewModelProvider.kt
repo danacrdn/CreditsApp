@@ -1,5 +1,7 @@
 package com.example.creditsapp
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -18,6 +20,7 @@ import com.example.creditsapp.presentation.viewmodel.userActivities.UserActiviti
 
 
 object AppViewModelProvider {
+    @RequiresApi(Build.VERSION_CODES.O)
     val Factory: ViewModelProvider.Factory = viewModelFactory {
 
         initializer {
