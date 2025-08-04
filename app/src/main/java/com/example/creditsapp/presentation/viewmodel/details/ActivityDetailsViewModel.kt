@@ -38,7 +38,7 @@ class ActivityDetailsViewModel(
         viewModelScope,
         _effect,
         activityId
-    )
+    ) { intent -> onIntent(intent) }
 
     init {
         onIntent(ActivityDetailsIntent.LoadActivityDetails)

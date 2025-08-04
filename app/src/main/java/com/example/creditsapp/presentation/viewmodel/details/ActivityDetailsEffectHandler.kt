@@ -7,10 +7,9 @@ import com.example.creditsapp.data.repository.AlumnoActividadRepository
 import com.example.creditsapp.data.repository.UserPreferencesRepository
 import com.example.creditsapp.domain.model.AlumnoActividad
 import com.example.creditsapp.domain.model.Inscripcion
-import com.example.creditsapp.presentation.utilities.UiState
+import com.example.creditsapp.presentation.viewmodel.register.RegisterIntent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -21,7 +20,8 @@ class ActivityDetailsEffectHandler(
     private val userPreferences: UserPreferencesRepository,
     private val viewModelScope: CoroutineScope,
     private val effect: MutableSharedFlow<ActivityDetailsEffect>,
-    private val activityId: Int
+    private val activityId: Int,
+    private val sendIntent: (ActivityDetailsIntent) -> Unit
 ) {
     @RequiresApi(Build.VERSION_CODES.O)
     fun handle(intent: ActivityDetailsIntent) {
@@ -38,7 +38,8 @@ class ActivityDetailsEffectHandler(
                                 .toAlumnoActividadState()
                             ActividadUiData(actividad, estado)
                         }
-                        effect.emit(ActivityDetailsEffect.DataLoaded(result))
+                        println(result)
+                        sendIntent(ActivityDetailsIntent.DataLoaded(result))
                     }
                 }
             }

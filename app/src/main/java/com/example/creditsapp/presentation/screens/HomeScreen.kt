@@ -185,7 +185,7 @@ fun CreditsCard(
                 style = MaterialTheme.typography.labelLarge
             )
             Text(
-                text = "$totalCredits/5",
+                text = "$totalCredits/5.0",
                 style = MaterialTheme.typography.displayLarge
             )
         }

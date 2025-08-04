@@ -100,6 +100,8 @@ fun ActivityDetailsScreen(
                     }
                     snackbarHostState.showSnackbar(message)
                 }
+
+                else -> {}
             }
         }
     }
